@@ -1,7 +1,6 @@
 import json
 import os
 import time
-import logging
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -142,9 +141,6 @@ def login_to_music_league(driver, config):
 
 
 def main():
-    handler = logging.StreamHandler()
-    logger = logging.getLogger('selenium')
-    logger.addHandler(handler)
     config_path = os.path.join(os.path.dirname(__file__), "config.json")
     config = load_config(config_path)
     driver = webdriver.Firefox(service=Service(executable_path=config.get("executable_path")))
