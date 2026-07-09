@@ -1,3 +1,4 @@
-__pycache__/GSReadAndWrite.cpython-312.pyc
-__pycache__/Login.cpython-312.pyc
+*.pyc
 credentials.json
+token.json
+config.json

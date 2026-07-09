@@ -9,15 +9,20 @@ from googleapiclient.errors import HttpError
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-SAMPLE_SPREADSHEET_ID = "13OVqFqcfIqTiVnodnKVOsmagTHxswW25fYKh6mnkqZY"
-SAMPLE_RANGE_NAME = "Class Data!A:AD"
+spreadsheetId = None
+range = "Votes/Song!A:AD"
 
+creds = None
 
-def read_sheet():
-  """Shows basic usage of the Sheets API.
-  Prints values from a sample spreadsheet.
-  """
-  creds = None
+def read_songs_sheet(config):
+  global creds
+  global spreadsheetId
+
+  range = "Votes/Song!A:AD"
+  
+  if not spreadsheetId:
+    spreadsheetId = config.get("spreadsheet_id")
+    
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
   # time.
@@ -43,7 +48,7 @@ def read_sheet():
     sheet = service.spreadsheets()
     result = (
         sheet.values()
-        .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
+        .get(spreadsheetId=spreadsheetId, range=range)
         .execute()
     )
     values = result.get("values", [])
@@ -52,9 +57,35 @@ def read_sheet():
       print("No data found.")
       return
 
-    print("Name, Major:")
-    for row in values:
-      # Print columns A and E, which correspond to indices 0 and 4.
-      print(f"{row[0]}, {row[4]}")
+    return values
+  except HttpError as err:
+    print(err)
+
+def write_sheet():
+  global creds
+  # The file token.json stores the user's access and refresh tokens, and is
+  # created automatically when the authorization flow completes for the first
+  # time.
+  if os.path.exists("token.json"):
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+  # If there are no (valid) credentials available, let the user log in.
+  if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+      creds.refresh(Request())
+    else:
+      flow = InstalledAppFlow.from_client_secrets_file(
+          "credentials.json", SCOPES
+      )
+      creds = flow.run_local_server(port=0)
+    # Save the credentials for the next run
+    with open("token.json", "w") as token:
+      token.write(creds.to_json())
+
+  try:
+    service = build("sheets", "v4", credentials=creds)
+
+    # Call the Sheets API
+    sheet = service.spreadsheets()
+    
   except HttpError as err:
     print(err)

@@ -1,5 +1,3 @@
-import json
-import os
 import time
 
 from selenium import webdriver
@@ -10,11 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 code = ""  # Global variable to store the Spotify verification code
-
-def load_config(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
 
 def wait_click(driver, locator, timeout=5):
     WebDriverWait(driver, timeout).until(EC.element_to_be_clickable(locator)).click()
@@ -70,10 +63,10 @@ def login_to_music_league(driver, config):
                 continue
 
     # Spotify login page
-    spotify_username = config.get("spotify_username") or config.get("email")
+    spotify_username = config.get("email")
     
     if not spotify_username:
-        raise ValueError("Config file must contain spotify_username")
+        raise ValueError("Config file must contain email")
 
     # Fill username
     for locator in [
@@ -143,9 +136,7 @@ def login_to_music_league(driver, config):
     return driver
 
 
-def Login():
-    config_path = os.path.join(os.path.dirname(__file__), "config.json")
-    config = load_config(config_path)
+def login(config):
     driver = webdriver.Firefox(service=Service(executable_path=config.get("executable_path")))
     try:
         login_to_music_league(driver, config)
@@ -153,3 +144,28 @@ def Login():
         print(driver.current_url)
     except Exception as e:
         print(f"An error occurred during login: {e}")
+
+def get_round_results(driver):
+        #Get all completed rounds and open them in new tabs to get the results
+        for locator in [
+            (By.XPATH, "//div[contains(@class, 'league-round-item') and @x-data = '{status: COMPLETE}']"),
+            (By.CSS_SELECTOR, "div.league-round-item[x-data*='status: COMPLETE']"),
+        ]:
+            try:
+                elems = WebDriverWait(driver, 5).until(EC.visibility_of_all_elements_located(locator))
+                links = []
+                for elem in elems:
+                    links.append(elem.get_attribute("href"))
+
+                round_list = driver.current_window_handle
+                for link in links:
+                    # Open each completed round in a new tab to get the results and switch back to round list
+                    driver.switch_to.new_window('tab')
+                    driver.get(link)
+                    time.sleep(1)
+                    #get the round results and log them to each player and song
+                    driver.switch_to.window(round_list)
+
+                return
+            except TimeoutException:
+                continue
