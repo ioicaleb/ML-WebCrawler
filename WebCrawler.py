@@ -2,6 +2,7 @@ import time
 import imaplib
 import email
 import re
+from bs4 import BeautifulSoup
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -59,28 +60,20 @@ def get_spotify_code(config):
             break
     
     email_id = messages[0].split()[-1]
-    status, msg_data = mail.fetch(email_id, "(BODY.PEEK[HEADER.FIELDS (SUBJECT)])")
+    status, data = mail.fetch(email_id, "(RFC822)")
 
     if status != "OK":
         print("Subject not found")
         return
     
-    for data in msg_data:
-        if isinstance(data, tuple):
-            msg = email.message_from_bytes(data[1])
-            raw_subject = msg["Subject"]
-
-            decoded_parts = email.header.decode_header(raw_subject)
-            subject = ""
-            for part, encoding in decoded_parts:
-                if isinstance(part, bytes):
-                    encoding = encoding or "utf-8"
-                    subject = part.decode(encoding, errors="replace")
-                else:
-                    subject += part
-
-            global code
-            code = subject.split()[0]
+    msg = email.message_from_bytes(data[0][1])
+    subject, encoding = email.header.decode_header(msg["Subject"])[0]
+    if isinstance(subject, bytes):
+        subject = subject.decode(encoding or "utf-8")
+    match = re.search(r"\d{6}", subject)
+    global code
+    if match:
+        code = match.group(0)
     if code:        
         mail.store(email_id, "+FLAGS", "\\Deleted")
         mail.expunge()
@@ -107,6 +100,7 @@ def login(driver, config):
                 wait_click(driver, locator)
                 break
             except TimeoutException:
+                print("Can't get to Spotify")
                 continue
 
     # Spotify login page
@@ -126,6 +120,7 @@ def login(driver, config):
             click_by_text(driver, "Continue")
             break
         except TimeoutException:
+            print("Can't add email address")
             continue
 
     global code
@@ -140,6 +135,7 @@ def login(driver, config):
             fill_code(driver, locator, code)
             break
         except TimeoutException:
+            print("Can't submit code")
             continue
     
     
@@ -158,6 +154,7 @@ def login(driver, config):
             )
             break
         except TimeoutException:
+            print("Can't authorize login")
             continue
 
     # Wait for redirect back to Music League
@@ -171,42 +168,46 @@ def login(driver, config):
 def get_round_results(driver):
     rounds = []
     #Get all completed rounds and open them in new tabs to get the results
-    elems = WebDriverWait(driver, 45).until(EC.visibility_of_all_elements_located((By.XPATH, "//*[@x-data and contains(translate(@x-data, ' ', ''), \"status:'COMPLETE'\")]")))
+    time.sleep(5)
+    round_list = driver.current_window_handle
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    status_pattern = re.compile(r"status:\s*'COMPLETE'")
+
+    elems = soup.find_all(
+        lambda tag: tag.name == 'div' and 
+        tag.has_attr('x-data') and 
+        status_pattern.search(tag['x-data']))
+    #elems = soup.select("[x-data = status: 'COMPLETE']")
+    #elems = WebDriverWait(driver, 45).until(EC.visibility_of_all_elements_located((By.XPATH, "//*[@x-data and contains(translate(@x-data, ' ', ''), \"status:'COMPLETE'\")]")))
     links = []
     for elem in elems:
-        anchors = elem.find_elements(By.TAG_NAME, "a")
-        link = anchors[2].get_attribute("href")
-        links.append(link)
-
-        round_list = driver.current_window_handle
+        anchors = [anchor.get('href') for anchor in elem.find_all("a", href = True)]
+        links.append(anchors[1])
     for link in links:
         # Open each completed round in a new tab to get the results and switch back to round list
         driver.switch_to.new_window('tab')
         driver.get(link)
-        time.sleep(1)
+        time.sleep(2)
         try:
-            round_card = driver.find_elements(By.CSS_SELECTOR, "div.px-2:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)")[1]
-            round_number = round_card.find_element(By.CSS_SELECTOR, "span").text
-            title = round_card.find_element(By.TAG_NAME, "h5").text
-            description = round_card.find_element(By.TAG_NAME, "p").text
+            soup = BeautifulSoup(driver.page_source, "html.parser")
+            round_card = soup.find_all(class_= "card")[1]
+            round_number = round_card.find("span").get_text()
+            title = round_card.find("h5").get_text()
+            description = round_card.find("p").get_text()
         except Exception as e:
             print(e)
-
-        for locator in [
-            (By.CSS_SELECTOR, "[id*='spotify']"),
-        ]:
+            print("Can't get round information")
+        
+        divs = soup.select("[id*='spotify']")
+        results = []
+        for div in divs:
             try:
-                divs = WebDriverWait(driver, 15).until(EC.visibility_of_all_elements_located(locator))
-                results = []
-                for div in divs:
-                    try:
-                        song_card = div.find_element(By.CSS_SELECTOR, ":nth-child(1) > :nth-child(1) > :nth-child(2)")
-                        voters_card = div.find_element(By.CSS_SELECTOR, "[id*='votes']")
-                        results.append(parse_submission(div, song_card, voters_card))
-                    except Exception as e:
-                        print(e)
-            except TimeoutException:
-                continue
+                song_card = div.find(":nth-child(1) > :nth-child(1) > :nth-child(2)")
+                voters_card = div.select("[id*='votes']")
+                results.append(parse_submission(div, song_card, voters_card))
+            except Exception as e:
+                    print(e)
+                    print("Can't get result information")
             round = parse_round_results(title, round_number, description, results)
         rounds.append(round)
         driver.switch_to.window(round_list)

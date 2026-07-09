@@ -1,5 +1,38 @@
 from Objects import *
 from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+
+def convert_username_to_name(username):
+    match username:
+        case "Amanda Gaffney":
+            return "Amanda"
+        case "#1 Caleb":
+            return "Caleb"
+        case "DensityBond":
+            return "Dorothy"
+        case "Lia":
+            return "Lia"
+        case "Our Husband Mike":
+            return "Mike"
+        case "Nate Snyder":
+            return "Nate"
+        case "Ola Sobieska":
+            return "Ola"
+        case "President X":
+            return "Rick"
+        case "Rose":
+            return "Rose"
+        case "Sarah K":
+            return "Sarah K"
+        case "arramdraper":
+            return "Sarah"
+        case "Nimbus":
+            return "Steve"
+        case "Tobi":
+            return "Tobi"
+        case _:
+            return "Left League"
+
 
 def parse_players(values):
     players = []
@@ -56,20 +89,20 @@ def parse_voters(voters_card):
     voters = []
     for vote_card in voters_card:
         voter = Voter(
-            name = vote_card.find_element(By.CSS_SELECTOR, ":nth-child(2) > b").text,
-            votes = int(vote_card.find_elements(By.CSS_SELECTOR, ":nth-child(3) > h6").text.split()[0]),
-            comment = vote_card.find_elements(By.CSS_SELECTOR, ":nth-child(2) > span").text
+            name = vote_card.select(":nth-child(2) > b").get_text(),
+            votes = int(vote_card.select(":nth-child(3) > h6").get_text().split()[0]),
+            comment = vote_card.select(":nth-child(2) > span").get_text()
             )
         voters.append(voter)
     return voters
 
 def parse_submission(div, song_card, voters_card):
     song = Song(
-        player_name = div.find_element(By.CSS_SELECTOR, "[id*='spotify']:nth-child(1) > :nth-child(2) > :nth-child(1) > :nth-child(1) > :last-child > h6").text,
-        name = song_card.find_element(By.CSS_SELECTOR, ":nth-child(1)").text,
-        artist = song_card.find_element(By.CSS_SELECTOR, ":nth-child(2)").text,
-        album = song_card.find_element(By.CSS_SELECTOR, ":nth-child(3)").text,
-        votes = int(div.find_element(By.CSS_SELECTOR, ":nth-child(1) > :nth-child(1) > :nth-child(3) > :nth-child(1)").text),
+        player_name = div.select("[id*='spotify']:nth-child(1) > :nth-child(2) > :nth-child(1) > :nth-child(1) > :last-child > h6").get_text(),
+        name = song_card.child().get_text(),
+        artist = song_card.select(":nth-child(2)").get_text(),
+        album = song_card.select(":nth-child(3)").get_text(),
+        votes = int(div.select(":nth-child(1) > :nth-child(1) > :nth-child(3) > :nth-child(1)").get_text()),
     )
     song.voters = parse_voters(voters_card)
     return song
