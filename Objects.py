@@ -1,9 +1,14 @@
 class Player:
     def __init__(self):
-        self.name = None
+        self.name = ""
         self.songs = []
-        self.votes_to = 0
-        self.voters = []
+
+    def __init__(self, name, songs, votes_to, voters):
+        self.name = name
+        self.name = ""
+        self.songs = songs
+        self.votes_to = votes_to
+        self.voters = voters
 
 class Round:
     def __init__(self, title, round_number, description, submissions):
@@ -11,18 +16,36 @@ class Round:
         self.round_number = round_number
         self.description = description
         self.submissions = submissions
+        self.winner = self.determine_winner(self.submissions)
+    
+    def determine_winner(self, submissions):
+        winners = []
+        for submission in submissions:
+            if submission.votes == submissions[0].votes:
+                winners.append(submission.player_name)
             
 class Voter:
-    def __init__(self, player_name, points, comment = ""):
-        self.player_name = player_name
-        self.points = points
+    def __init__(self, name, votes, comment = ""):
+        self.name = name
+        self.votes = votes
         self.comment = comment
 
 class Song:
-    def __init__(self, name, votes = 0, player_name = None, artist = None, album = None):
+    def __init__(self, name, votes = 0, player_name = None, artist = None, album = None, voters = []):
         self.name = name
         self.artist = artist
         self.album = album
         self.player_name = player_name
         self.votes = votes
-        self.voters = []
+        self.voters = voters
+    
+def convert_username_to_name(username, active_players, defunct_players = [], name = ""):
+    for player in active_players:
+        if username == player[0]:
+            return player[1]
+    if defunct_players and name:
+        for player in defunct_players:
+            if next((s for s in player.songs if name == s.name), None): 
+                return player.name
+    return ""
+        

@@ -5,7 +5,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from Parser import parse_players
+from Objects import Player, Song
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
@@ -33,8 +33,45 @@ def verify_credentials():
     with open("token.json", "w") as token:
       token.write(creds.to_json())
 
+#Converts sheets information to a player and adds them to defunct players list if they are not in the active group
+def parse_players(values, active_players):
+    players = []
 
-def read_songs_sheet(config):
+    if not values:
+        print("No data found.")
+        return
+
+    i = 0
+    while i < len(values[0]):
+        player = Player()
+        j = 0
+        for row in values:
+            j += 1
+            if i >= len(row) or not row[i]:
+                break
+            if j == 1:
+                player.name = row[i]
+                continue
+            if (i + 1) >= len(row) or not row[i + 1]:
+                break
+            if j == 2:
+                continue
+            
+            song = Song(row[i])
+            player.songs.append(song)
+
+        if player.name is not None:
+          for ap in active_players:
+            if ap(1) == player.name:
+                break
+            else:
+              players.append(player)
+
+        i += 2
+    return players
+
+#Finds player names for players that have left the league
+def get_defunct_players(config):
   global creds
 
   spreadsheetId = config.get("spreadsheet_id")
@@ -57,8 +94,7 @@ def read_songs_sheet(config):
     if not values:
       print("No data found.")
       return
-    
-    return parse_players(values)
+    return parse_players(values, config.get("username-player_name"))
   except HttpError as err:
     print(err)
 

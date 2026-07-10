@@ -2,7 +2,7 @@ import time
 import imaplib
 import email
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -10,7 +10,8 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from Parser import parse_round_results, parse_submission
+from Objects import Round, Voter, Song, convert_username_to_name
+from SheetManager import get_defunct_players
 
 code = ""  # Global variable to store the Spotify verification code
 
@@ -162,8 +163,10 @@ def login(driver, config):
 
     return driver
 
-def get_round_results(driver):
+def get_round_results(driver, config):
     rounds = []
+    active_players = config.get("username-player_name")
+    defunct_players = get_defunct_players(config)
     time.sleep(5)
     round_list = driver.current_window_handle
     soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -185,6 +188,9 @@ def get_round_results(driver):
         time.sleep(2)
         try:
             soup = BeautifulSoup(driver.page_source, "html.parser")
+            for element in soup.find_all(text=True):
+                if isinstance(element, NavigableString) and element.strip() == "":
+                    element.extract()
             round_card = soup.find_all(class_= "card")[5]
             round_number = int(round_card.find("span").get_text().split()[1])
             title = round_card.find("h5").get_text()
@@ -194,18 +200,29 @@ def get_round_results(driver):
             print("Can't get round information")
         
         divs = soup.select("[id*='spotify']")
-        results = []
+        submissions = []
         for div in divs:
             try:
                 song_card = div.select_one("div:nth-child(1) > div:nth-child(1) > div:nth-child(2)")
-                voters_card = div.select("[id*='votes']")
-                player_card = div.select_one("div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:last-child")
                 votes = int(div.select_one("div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > h3").get_text().strip())
-                results.append(parse_submission(player_card, song_card, voters_card, votes))
+                name = song_card.find().get_text().strip()
+                player_name = convert_username_to_name(active_players = active_players, defunct_players = defunct_players, name = name, username = div.select_one("div.rank-1 > :first-child > :first-child > :last-child > h6").get_text().strip())
+                artist = song_card.select_one(":nth-child(2)").get_text().strip()
+                album = song_card.select_one(":nth-child(3)").get_text().strip()
+                voters=[]
+                voters_card = div.select("[id*='votes'] > *")
+                for voter_info in voters_card:
+                    voter_name = convert_username_to_name(active_players = active_players, username = voter_info.select_one(":nth-child(2) > b").get_text())
+                    votes_total = int(voter_info.select_one(":nth-child(3) > h6").get_text().split()[0])
+                    comment = ""
+                    if voter_info.find("span"):
+                        comment = voter_info.select_one(":nth-child(2) > span").get_text()
+                    voters.append(Voter(voter_name, votes_total, comment))
+                submissions.append(Song(player_name, name, artist, album, voters, votes))
             except Exception as e:
                     print(e)
                     print("Can't get result information")
-            round = parse_round_results(title, round_number, description, results)
+        round = Round(title, round_number, description, submissions)
         rounds.append(round)
         driver.switch_to.window(round_list)
     return rounds.sort(key = lambda x: (x.round_number))
@@ -214,7 +231,7 @@ def crawl(config):
     driver = webdriver.Firefox(service=Service(executable_path=config.get("executable_path")))
     try:
         login(driver, config)
-        results = get_round_results(driver)
+        results = get_round_results(driver, config)
         return results
     except Exception as e:
         print(f"An error occurred during login: {e}")

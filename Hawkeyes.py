@@ -15,7 +15,10 @@ def main():
     config_path = os.path.join(os.path.dirname(__file__), "config.json")
     config = load_config(config_path)
     results = crawl(config)
-    print("Results successfully obtained")
+    if results:
+        print("Results successfully obtained")
+    else:
+        print("Crawl failed")    
 
 if __name__ == "__main__":
     main()
