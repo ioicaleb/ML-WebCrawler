@@ -1,14 +1,13 @@
-class Player:
+class Player_Defunct:
     def __init__(self):
         self.name = ""
         self.songs = []
 
-    def __init__(self, name, songs, votes_to, voters):
+class Player:
+    def __init__(self, name = "", votes_to = 0):
         self.name = name
-        self.name = ""
-        self.songs = songs
         self.votes_to = votes_to
-        self.voters = voters
+        self.wins = 0
 
 class Round:
     def __init__(self, title, round_number, description, submissions):
@@ -16,13 +15,16 @@ class Round:
         self.round_number = round_number
         self.description = description
         self.submissions = submissions
-        self.winner = self.determine_winner(self.submissions)
+        self.winner = self.determine_winner(submissions)
     
     def determine_winner(self, submissions):
         winners = []
         for submission in submissions:
             if submission.votes == submissions[0].votes:
                 winners.append(submission.player_name)
+            else:
+                break
+        return winners
             
 class Voter:
     def __init__(self, name, votes, comment = ""):
@@ -45,7 +47,7 @@ def convert_username_to_name(username, active_players, defunct_players = [], nam
             return player[1]
     if defunct_players and name:
         for player in defunct_players:
-            if next((s for s in player.songs if name == s.name), None): 
-                return player.name
-    return ""
+            if next((s for s in player["songs"] if name == s), None):
+                return player["name"]
+    return "[Left the League]"
         
