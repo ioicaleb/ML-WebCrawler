@@ -1,40 +1,99 @@
+"""
+Hawkeyes.py - Main execution module for ML WebCrawler
+
+This module serves as the entry point for the web crawler application,
+handling the main workflow of fetching data, processing results,
+and exporting to spreadsheet.
+
+Functions:
+    main() - Main execution function that orchestrates the crawling process
+"""
+
 from WebCrawler import get_results, check_for_new_rounds
 from ExportManager import export_players, export_songs
-from SheetManager import post_player_sheet
+from SheetManager import set_spreadsheet_id, post_player_sheet, post_vote_matrix
 from JSONManager import read_json
+from Backups.StatManager import vote_matrix_analysis
 import sys
 
-# TODO: VOTE MATRIX
-# TODO: Statistical analysis
-
 def main():
+    """
+    Main execution function that orchestrates the crawling process.
+    
+    This function:
+    1. Reads configuration
+    2. Sets up spreadsheet ID
+    3. Checks for existing results
+    4. Handles new rounds detection
+    5. Processes results and exports to spreadsheet
+    6. Performs statistical analysis
+    """
+    # Read configuration from JSON
     config = read_json("config")
+    
+    # Set up the spreadsheet ID for Google Sheets operations
+    set_spreadsheet_id(config)
+    
+    # Attempt to read existing results from JSON
     results = read_json("rounds")
+    
     if results:
         print("Pulled previous results")
+        
+        # Try to read cached songs and players
         songs = read_json("songs")
         players = read_json("players")
+        
+        # Check if we have both songs and players cached
         if songs and players:
+            # Get the last round number from existing results
             last_round_number = results[-1]["round_number"]
+            
+            # Check if there are new rounds available
             if check_for_new_rounds(last_round_number, config):
+                # Re-read songs and players (in case they were updated)
                 songs = read_json("songs")
                 players = read_json("players")
-                post_player_sheet(config, players, songs)
+                
+                # Post player sheet to Google Sheets
+                post_player_sheet(players, songs)
                 print("Stat sheet updated successfully")
+        
+        # Handle case where cache is missing
         elif not songs:
+            # Export songs and players to create cache
             export_songs(results)
             export_players(results)
             print("Failed to get songs cache")
         else:
+            # Export players only
             export_players(results)
             print("Failed to get players cache")
+    
     else:
+        # No existing results, fetch new ones
         results = get_results(config)
-        if results:
-            print("Results successfully obtained")
-        else:
-            print("Crawl failed")
-            sys.exit()
+    
+    # Process results if they were successfully obtained
+    if results:
+        print("Results successfully obtained")
+        
+        # Perform statistical analysis on vote matrix
+        vm_results = vote_matrix_analysis(results)
+        
+        # If analysis was successful, post to spreadsheet
+        if vm_results:
+            post_vote_matrix(vm_results)
+    else:
+        # If crawling failed, exit with error
+        print("Crawl failed")
+        sys.exit()
 
 if __name__ == "__main__":
+    """
+    Entry point of the application.
+    
+    This block ensures that main() is only called when the script is 
+    executed directly (not imported as a module).
+    """
     main()
