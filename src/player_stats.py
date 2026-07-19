@@ -238,7 +238,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                             expand = True
                         )
                     for voter in song["voters"]:
-                        voter_stats = ft.Text(f"{voter.get('name')}{':  ' + str(voter.get("votes")) if voter.get("name") != song.get("player_name") and voter.get("votes") else ''}", size=18)
+                        voter_stats = ft.Text(f"{voter.get('name')}{':  ' + str(voter.get('votes')) if voter.get('name') != song.get('player_name') and voter.get('votes') else ''}", size=18)
                         voter_info = ft.Column(
                                 controls = [voter_stats],
                                 spacing = 2
