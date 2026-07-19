@@ -204,5 +204,6 @@ if __name__ == "__main__":
         target=main, 
         view=ft.AppView.WEB_BROWSER,  
         port=port_to_use,                     
-        host="0.0.0.0"                
+        host="0.0.0.0",
+        assets_dir="assets"             
     )

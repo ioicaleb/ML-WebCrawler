@@ -22,30 +22,24 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
         player_name = player.get("name")
 
-        player_avatar = get_player_avatar(player_name)
-        if player_avatar:
-            avatar = ft.Container(
-                content=ft.Image(
-                    src= player_avatar,
-                    fit="cover",
-                    border_radius=25,
-                    width=80
-                ),
-                width=80,
-                height = 80,
-                border_radius=40,
-                border=ft.BorderSide(2, ft.Colors.RED_500)
+        avatar_url = player.get("url")
+
+        if avatar_url and avatar_url.startswith("http"):
+            avatar = ft.Image(
+                src=avatar_url,
+                width=100,
+                height=100,
+                fit=ft.ImageFit.COVER,
+                border_radius=ft.border_radius.all(50)
             )
         else:
             avatar = ft.Container(
-                content = ft.Icon(
-                    ft.Icons.PERSON, 
-                    color=ft.Colors.RED_300
-                ),
-                width = 80,
-                height = 80,
-                border_radius=40,
-                border=ft.BorderSide(2, ft.Colors.RED_500)
+                width=100,
+                height=100,
+                shape=ft.BoxShape.CIRCLE,
+                bgcolor=ft.Colors.GREY_800,
+                alignment=ft.alignment.center,
+                content=ft.Icon(ft.Icons.PERSON, size=40, color=ft.Colors.GREY_400)
             )
 
         top_songs_list = ft.Container(
