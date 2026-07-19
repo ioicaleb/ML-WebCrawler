@@ -1,5 +1,5 @@
 import flet as ft
-from DataProcessing.search_processor import find_songs_by_artist, find_songs_by_title, find_songs_by_album
+from DataProcessing.search_processor import search_songs
 import asyncio
 
 search_task = None
@@ -34,9 +34,7 @@ def generate_songs_tab(page: ft.Page):
                 page.update()
 
                 songs_data = []
-                songs_data.extend(find_songs_by_title(keyword))
-                songs_data.extend(find_songs_by_artist(keyword))
-                songs_data.extend(find_songs_by_album(keyword))
+                songs_data.extend(search_songs(keyword))
 
                 titles_list = set()
                 unique_results = []

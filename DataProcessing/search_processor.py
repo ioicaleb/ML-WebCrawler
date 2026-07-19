@@ -115,3 +115,13 @@ def get_player_avatar(player):
     for player_data in players:
         if player_data.get("name") == player:
             return player_data.get("avatar")
+        
+def search_songs(keyword):
+    data = []
+    
+    global songs
+    for song in songs:
+        if keyword.lower() in song["artist"].lower() or keyword.lower() in song["album"].lower() or keyword.lower() in song["name"].lower():
+            data.append(song)
+
+    return data
