@@ -12,7 +12,7 @@ def generate_rounds_tab(page: ft.Page):
         round_header = ft.Column(
             controls = [
                 ft.Text(round_id, size=64, weight=ft.FontWeight.BOLD),
-                ft.Text(f"{round_name} - {round_item.get("description")}", size=20, color=ft.Colors.GREY_400, expand= True)
+                ft.Text(f"{round_name} - {round_item.get('description')}", size=20, color=ft.Colors.GREY_400, expand= True)
             ]
         )
 
