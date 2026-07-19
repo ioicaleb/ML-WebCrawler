@@ -1,5 +1,6 @@
 import flet as ft
 from DataProcessing.data_processor import *
+import asyncio
 
 def generate_profile_tab(page: ft.Page, return_callback):
     profiles_list = ft.ListView(expand=True, spacing=10, padding=10)
@@ -10,7 +11,25 @@ def generate_profile_tab(page: ft.Page, return_callback):
         page.controls.clear()
         return_callback(page, 2) 
 
-    def get_player_profile(player: dict):
+    async def get_player_profile(player: dict):
+        page.splash = ft.ProgressBar()
+        page.update()
+
+        name = player.get("name")
+
+        # 2. Shift all heavy search filtering tasks over to a background thread pool
+        # This keeps the main Flet event loop completely clear and smooth
+        player_stats_dict = await asyncio.to_thread(read_json, "precomputed_stats")
+        player_stats_data = player_stats_dict.get(name, {}) if player_stats_dict else {}
+
+        top_songs_data = await asyncio.to_thread(find_top_songs, name)
+        all_songs_data = await asyncio.to_thread(find_songs_by_submitter, name)
+        round_songs_data = await asyncio.to_thread(find_player_songs_by_round, name)
+        votes_from_data = await asyncio.to_thread(find_songs_by_voter, name)
+        votes_to_data = await asyncio.to_thread(find_player_songs_by_round, name)
+
+        # 3. Clear loading indicators and proceed with UI population using the gathered data
+        page.splash = None
         page.controls.clear()
 
         back_button = ft.Button(
@@ -42,7 +61,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             alignment=ft.Alignment.CENTER_LEFT
         )
 
-        top_songs_data = find_top_songs(player["name"])
         for song in top_songs_data:
             song_details = (f"{song.get('name')}\n"
                             f"Artist: {song.get('artist')}\n"
@@ -66,7 +84,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             alignment=ft.Alignment.CENTER_LEFT
         )
         
-        all_songs_data = find_songs_by_submitter(player["name"])
         for song in all_songs_data:
             song_details = (f"{song.get('name')}\n"
                             f"Artist: {song.get('artist')}\n"
@@ -89,8 +106,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             border_radius=10,
             height=600,
         )
-
-        round_songs_data = find_player_songs_by_round(player["name"])
 
         for round_item in round_songs_data:
             if round_item.get("songs"):
@@ -143,8 +158,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             expand = True
         )
 
-        votes_from_data = find_songs_by_voter(player.get("name"))
-
         for song in votes_from_data:
             if song.get("player_name") != player.get("name"):
                 song_details = (
@@ -182,8 +195,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             alignment=ft.Alignment.CENTER_LEFT,
             expand = True
         )
-
-        votes_to_data = find_player_songs_by_round(player["name"])
         
         for vote_round_item in votes_to_data:
             if vote_round_item.get("songs"):

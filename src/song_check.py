@@ -12,99 +12,94 @@ def generate_songs_tab(page: ft.Page):
         scroll= ft.ScrollMode.HIDDEN
     )
 
-    def search_song(e):
+    def search_song(e = None):
         global search_task
-        search_value = e.control.value.lower()
-    
-    # 1. Cancel the previous timer if the user is still actively typing
+
         if search_task:
             search_task.cancel()
+
         async def debounce_filter():
             try:
-                # 2. Wait 300ms for pause in typing
                 await asyncio.sleep(0.3) 
+                    
+                keyword = search_input.value.strip().lower()
+                results_list.controls.clear()
+
+                if not keyword:
+                    status_text.value = "Enter a song name, artist, or album to search."
+                    page.update()
+                    return
                 
-                # 3. Execute your list filter logic here
-                # filtered_list = [p for p in all_players if search_value in p.name.lower()]
-                # update_ui_list(filtered_list)
-                
-                e.page.update()
-            except asyncio.CancelledError:
-                pass # Silently drop canceled keystrokes
+                status_text.value = f"Searching for '{keyword}'..."
+                page.update()
 
-        # 4. Schedule the new filter task safely inside Flet's async thread loop
-        search_task = e.page.run_task(debounce_filter)
-            
-        keyword = search_input.value.strip().lower()
-        results_list.controls.clear()
+                songs_data = []
+                songs_data.extend(find_songs_by_title(keyword))
+                songs_data.extend(find_songs_by_artist(keyword))
+                songs_data.extend(find_songs_by_album(keyword))
 
-        if not keyword:
-            status_text.value = "Enter a song name, artist, or album to search."
-            page.update()
-            return
+                titles_list = set()
+                unique_results = []
+                for song in songs_data:
+                    title = song.get("name")
+                    if title not in titles_list:
+                        titles_list.add(title)
+                        unique_results.append(song)
 
-        songs_data = []
-        songs_data.extend(find_songs_by_title(keyword))
-        songs_data.extend(find_songs_by_artist(keyword))
-        songs_data.extend(find_songs_by_album(keyword))
+                songs_data = unique_results
 
-        titles_list = set()
-        unique_results = []
-        for song in songs_data:
-            title = song.get("name")
-            if title not in titles_list:
-                titles_list.add(title)
-                unique_results.append(song)
+                if len(songs_data) == 0:
+                    status_text.value = f"No matches found for {search_input.value}."
+                else:
+                    status_text.value = f"Found {len(songs_data)} matching song{'s' if len(songs_data) > 1 else ''}:"
 
-        songs_data = unique_results
+                for song in songs_data:
+                    title = song.get("name")
+                    artist = song.get("artist")
+                    album = song.get("album")
 
-        for song in songs_data:
-            title = song.get("name")
-            artist = song.get("artist")
-            album = song.get("album")
-
-            song_card = ft.Container(
-                content = ft.Column(
-                    controls= [
-                        ft.Row(
-                            controls = [
-                                ft.Icon(ft.Icons.AUDIOTRACK, size = 22, color= ft.Colors.BLUE_400),
-                                ft.Text(title, size = 24, weight=ft.FontWeight.W_500)
-                            ]
-                        ),
-                        ft.Row(
-                            controls=[
+                    song_card = ft.Container(
+                        content = ft.Column(
+                            controls= [
                                 ft.Row(
-                                    controls= [
-                                        ft.Icon(ft.Icons.MIC, size = 22),
-                                        ft.Text(f"Artist: {artist}", size = 18)
+                                    controls = [
+                                        ft.Icon(ft.Icons.AUDIOTRACK, size = 22, color= ft.Colors.BLUE_400),
+                                        ft.Text(title, size = 24, weight=ft.FontWeight.W_500)
                                     ]
                                 ),
                                 ft.Row(
-                                    controls = [
-                                        ft.Icon(ft.Icons.ALBUM, size = 22),
-                                        ft.Text(f"Album: {album}", size=18)
-                                    ]
+                                    controls=[
+                                        ft.Row(
+                                            controls= [
+                                                ft.Icon(ft.Icons.MIC, size = 22),
+                                                ft.Text(f"Artist: {artist}", size = 18)
+                                            ]
+                                        ),
+                                        ft.Row(
+                                            controls = [
+                                                ft.Icon(ft.Icons.ALBUM, size = 22),
+                                                ft.Text(f"Album: {album}", size=18)
+                                            ]
+                                        )
+                                    ],
+                                    spacing = 20
                                 )
                             ],
-                            spacing = 20
-                        )
-                    ],
-                    spacing = 24
-                ),
-                padding = ft.Padding(15, 15, 15, 15),
-                bgcolor = ft.Colors.SURFACE_CONTAINER_LOW if page.theme_mode == ft.ThemeMode.DARK else ft.Colors.SURFACE_CONTAINER_HIGH,
-                border_radius = 8,
-                border = ft.BorderSide(width = 1, color=ft.Colors.GREY_800)
-            )
-            results_list.controls.append(song_card)
-
-        if len(songs_data) == 0:
-            status_text.value = f"No matches found for {search_input.value}."
-        else:
-            status_text.value = f"Found {len(songs_data)} matching song{'s' if len(songs_data) > 1 else ''}:"
+                            spacing = 24
+                        ),
+                        padding = ft.Padding(15, 15, 15, 15),
+                        bgcolor = ft.Colors.SURFACE_CONTAINER_LOW if page.theme_mode == ft.ThemeMode.DARK else ft.Colors.SURFACE_CONTAINER_HIGH,
+                        border_radius = 8,
+                        border = ft.BorderSide(width = 1, color=ft.Colors.GREY_800)
+                    )
+                    results_list.controls.append(song_card)
+                
+                page.update()
+            except asyncio.CancelledError:
+                pass
         
-        page.update()
+
+        search_task = e.page.run_task(debounce_filter)
 
     search_input = ft.TextField(
         label = "Search songs, artists or albums",

@@ -1,7 +1,0 @@
-
-Make program deployable
-Set up Configuration app
-Make usable for other leagues
-    -league id in url (?)
-        -Can import cache using that ID when sharing with others
-    -Connect to cloud storage
