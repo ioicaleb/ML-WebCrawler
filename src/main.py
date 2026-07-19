@@ -175,7 +175,7 @@ async def loading(page: ft.Page):
             progress_bar.value = 0.9
             status_text.value = "Building search cache..."
             page.update()
-            await init_search_cache()
+            await asyncio.to_thread(init_search_cache)
 
             progress_bar.value = 1.0
             status_text.value = "Done! Loading page..."
