@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import os
 from DataCollection.data_collector import collect_data, new_round_check, analyze_stats
 from DataCollection.json_manager import *
 from DataProcessing.data_processor import *
@@ -197,9 +198,11 @@ async def loading(page: ft.Page):
     page.run_task(background_crawler_pipeline)
 
 if __name__ == "__main__":
+    port_to_use = int(os.environ.get("PORT", 8502)) 
+    
     ft.app(
-        target=loading, 
-        view=ft.AppView.WEB_BROWSER, 
-        port=8502,                   
+        target=main, 
+        view=ft.AppView.WEB_BROWSER,  
+        port=port_to_use,                     
         host="0.0.0.0"                
     )
