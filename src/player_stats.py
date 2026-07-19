@@ -429,23 +429,22 @@ def generate_profile_tab(page: ft.Page, return_callback):
             margin=ft.Margin(0, 0, 0, 20)
         )
 
-        player_stats_list = ft.Container(
-            content=ft.Column(
-                controls=[
-                    favorite_player_container,
-                    top_player_container,
-                    best_song_container,
-                    best_round_container,
-                    favorite_artist_container,
-                    top_artist_container,
-                    points_per_vote_container,
-                    number_of_comments_container
-                ],
-                scroll=ft.ScrollMode.HIDDEN,
-                expand = True
-            ),
-            alignment=ft.Alignment.TOP_LEFT,
-            expand=True
+        player_stats_list = ft.ListView(
+            expand=True,
+            spacing=15,
+            padding=20,
+            scroll=ft.ScrollMode.HIDDEN,
+            # item_extent=None, # Leave dynamic or set a fixed height if items match exactly
+            controls=[
+                favorite_player_container,
+                top_player_container,
+                best_song_container,
+                best_round_container,
+                favorite_artist_container,
+                top_artist_container,
+                points_per_vote_container,
+                number_of_comments_container
+            ],
         )
 
         player_stats = ft.Container(
@@ -508,10 +507,8 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
                 for button in actual_menu_column.controls:
                     if button.content.color != ft.Colors.PURPLE_500:
-                        # Reset all other text menu targets back to neutral styles
                         button.content.color = default_color
             except (IndexError, AttributeError):
-                # Fallback safeguard option in case your structural indices shift later
                 e.control.content.color = ft.Colors.PURPLE_500
             page.update()
     

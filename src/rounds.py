@@ -12,7 +12,7 @@ def generate_rounds_tab(page: ft.Page):
         round_header = ft.Column(
             controls = [
                 ft.Text(round_id, size=64, weight=ft.FontWeight.BOLD),
-                ft.Text(f"{round_name} - {round_item.get('description')}", size=20, color=ft.Colors.GREY_400, expand= True)
+                ft.Text(f"{round_name} - {round_item.get('description')}", size=20, expand= True)
             ]
         )
 
@@ -41,10 +41,10 @@ def generate_rounds_tab(page: ft.Page):
             song_info = ft.Column(
                 controls=[
                     ft.Text(f"{song.get('name')}", size=20, weight=ft.FontWeight.W_500),
-                    ft.Text(f"Artist: {song.get('artist')}", size=18, color=ft.Colors.GREY_300),
-                    ft.Text(f"Album: {song.get('album')}", size=18, color=ft.Colors.GREY_300),
-                    ft.Text(f"Submitted By: {song.get('player_name')}", size=18, color=ft.Colors.GREY_300),
-                    ft.Text(f"Votes: {song.get('votes')}", size=18, color=ft.Colors.GREY_300),
+                    ft.Text(f"Artist: {song.get('artist')}", size=18),
+                    ft.Text(f"Album: {song.get('album')}", size=18),
+                    ft.Text(f"Submitted By: {song.get('player_name')}", size=18),
+                    ft.Text(f"Votes: {song.get('votes')}", size=18),
                 ],
                 spacing=2
             )
@@ -80,7 +80,7 @@ def generate_rounds_tab(page: ft.Page):
         else:
             winners = f"Winners: {', '.join(winner_list[:-1])}, and {winner_list[-1]}"
             
-        round_header.controls.append(ft.Text(f"{winners}", size=24, color=ft.Colors.GREY_400))
+        round_header.controls.append(ft.Text(f"{winners}", size=24))
         round_header.controls.append(ft.Divider(thickness = 1, color=ft.Colors.GREY_100))
 
         views_map[f"Round {round_item['round_number']}"] = round_view
@@ -94,6 +94,7 @@ def generate_rounds_tab(page: ft.Page):
         
     def handle_menu_click(e):
         clicked_title = e.control.content.value
+        default_color = ft.Colors.ON_SURFACE
 
         for title, view_container in views_map.items():
             if title == clicked_title:
@@ -101,21 +102,41 @@ def generate_rounds_tab(page: ft.Page):
             else:
                 view_container.visible = False
         
+        try:
+            for button in navigation_menu.controls:
+                if isinstance(button, ft.TextButton) and button.content:
+                    if button.content.value == clicked_title:
+                        button.content.color = ft.Colors.PURPLE_500
+                    else:
+                        button.content.color = default_color
+        except (IndexError, AttributeError):
+            if e.control.content:
+                e.control.content.color = ft.Colors.PURPLE_500
+        
         page.update()
 
-    navigation_menu = ft.Column(
-        controls=[
-            ft.TextButton(
-                content=ft.Text(title, size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                on_click=handle_menu_click,
-                style=ft.ButtonStyle(padding=0)
-            ) for i, title in enumerate(views_map.keys())
-        ],
-        alignment=ft.MainAxisAlignment.START,
-        spacing=15,
-        scroll= ft.ScrollMode.HIDDEN,
-        margin = ft.Margin(60, 0, 0, 0)
+    navigation_menu_container = ft.Container(
+        margin=ft.Margin(60, 0, 0, 0),
+        content=ft.Column(
+            controls=[
+                ft.TextButton(
+                    content=ft.Text(
+                        title, 
+                        size=24, 
+                        weight=ft.FontWeight.BOLD,
+                        color=ft.Colors.ON_SURFACE
+                    ),
+                    on_click=handle_menu_click,
+                    style=ft.ButtonStyle(padding=0)
+                ) for title in views_map.keys()
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            spacing=15,
+            scroll=ft.ScrollMode.HIDDEN
+        )
     )
+
+    navigation_menu = navigation_menu_container.content
 
     main_view = ft.Row(
         vertical_alignment=ft.CrossAxisAlignment.START,

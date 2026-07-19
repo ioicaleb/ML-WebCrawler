@@ -1,5 +1,8 @@
 import flet as ft
 from DataProcessing.search_processor import find_songs_by_artist, find_songs_by_title, find_songs_by_album
+import asyncio
+
+search_task = None
 
 def generate_songs_tab(page: ft.Page):
     results_list = ft.Column(
@@ -10,6 +13,28 @@ def generate_songs_tab(page: ft.Page):
     )
 
     def search_song(e):
+        global search_task
+        search_value = e.control.value.lower()
+    
+    # 1. Cancel the previous timer if the user is still actively typing
+        if search_task:
+            search_task.cancel()
+        async def debounce_filter():
+            try:
+                # 2. Wait 300ms for pause in typing
+                await asyncio.sleep(0.3) 
+                
+                # 3. Execute your list filter logic here
+                # filtered_list = [p for p in all_players if search_value in p.name.lower()]
+                # update_ui_list(filtered_list)
+                
+                e.page.update()
+            except asyncio.CancelledError:
+                pass # Silently drop canceled keystrokes
+
+        # 4. Schedule the new filter task safely inside Flet's async thread loop
+        search_task = e.page.run_task(debounce_filter)
+            
         keyword = search_input.value.strip().lower()
         results_list.controls.clear()
 
@@ -51,14 +76,14 @@ def generate_songs_tab(page: ft.Page):
                             controls=[
                                 ft.Row(
                                     controls= [
-                                        ft.Icon(ft.Icons.MIC, size = 22, color= ft.Colors.GREY_300),
-                                        ft.Text(f"Artist: {artist}", size = 18, color= ft.Colors.GREY_300)
+                                        ft.Icon(ft.Icons.MIC, size = 22),
+                                        ft.Text(f"Artist: {artist}", size = 18)
                                     ]
                                 ),
                                 ft.Row(
                                     controls = [
-                                        ft.Icon(ft.Icons.ALBUM, size = 22, color= ft.Colors.GREY_300),
-                                        ft.Text(f"Album: {album}", size=18, color=ft.Colors.GREY_300)
+                                        ft.Icon(ft.Icons.ALBUM, size = 22),
+                                        ft.Text(f"Album: {album}", size=18)
                                     ]
                                 )
                             ],
@@ -68,7 +93,7 @@ def generate_songs_tab(page: ft.Page):
                     spacing = 24
                 ),
                 padding = ft.Padding(15, 15, 15, 15),
-                bgcolor = ft.Colors.SURFACE_CONTAINER_LOW,
+                bgcolor = ft.Colors.SURFACE_CONTAINER_LOW if page.theme_mode == ft.ThemeMode.DARK else ft.Colors.SURFACE_CONTAINER_HIGH,
                 border_radius = 8,
                 border = ft.BorderSide(width = 1, color=ft.Colors.GREY_800)
             )
@@ -95,7 +120,7 @@ def generate_songs_tab(page: ft.Page):
         on_click = lambda _: (setattr(search_input, "value", ""), search_song(None))
     )
 
-    status_text = ft.Text("Enter a song name, artist, or album to search.", size = 18, color=ft.Colors.GREY_300)
+    status_text = ft.Text("Enter a song name, artist, or album to search.", size = 18)
 
     song_check_container = ft.Container(
         content = ft.Column(
