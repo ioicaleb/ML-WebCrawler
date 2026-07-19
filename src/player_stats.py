@@ -7,9 +7,12 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
     players_data = get_players()
     
+    master_profiles_view = ft.Container(content=profiles_list, expand=True)
+
     def return_to_players(e):
         page.controls.clear()
-        return_callback(page, 2) 
+        page.add(master_profiles_view)
+        page.update()
 
     async def get_player_profile(player: dict):
         page.splash = ft.ProgressBar()
@@ -648,7 +651,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                         title=ft.Text(str(name), size=22, weight=ft.FontWeight.BOLD),
                         subtitle=ft.Text(f"Votes: {player_object.get('votes_to', 0)} • Click to view full profile", size=16),
                         trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
-                        on_click=lambda e, p_obj=player_object: get_player_profile(p_obj)
+                        on_click=lambda e, p_obj=player_object: page.run_task(get_player_profile, p_obj)
                     )
                 )
 
