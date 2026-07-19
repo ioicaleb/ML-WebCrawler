@@ -10,13 +10,12 @@ from standings import generate_standings_tab
 from rounds import generate_rounds_tab
 from song_check import generate_songs_tab
 import flet as ft
-from fastapi import FastAPI
 
-app = FastAPI()
-
-def main(page: ft.Page, start_tab_index = 0): 
+def main(page: ft.Page, start_tab_index=0): 
     page.title = "Eric the Data Manager"
     page.theme_mode = ft.ThemeMode.DARK
+    page.horizontal_alignment = ft.CrossAxisAlignment.START
+    page.vertical_alignment = ft.MainAxisAlignment.START
     
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.DARK:
@@ -33,8 +32,8 @@ def main(page: ft.Page, start_tab_index = 0):
         tooltip="Toggle theme"
     )
 
-    def return_callback(page, index):
-        main(page, start_tab_index=index)
+    def return_callback(page_obj, index):
+        main(page_obj, start_tab_index=index)
     
     standings_container = generate_standings_tab(page)
     matrix_container = generate_matrix_tab(page)
@@ -42,34 +41,29 @@ def main(page: ft.Page, start_tab_index = 0):
     rounds_container = generate_rounds_tab(page)
     songs_container = generate_songs_tab(page)
 
-    tab_view = ft.Tabs(
-        length=5,
-        selected_index=start_tab_index,
+    tab_view = ft.Column(
         expand=True,
-        content=ft.Column(
-            expand=True,
-            controls=[
-                ft.TabBar(
-                    tabs=[
-                        ft.Tab(label="Standings", icon=ft.Icons.LEADERBOARD),
-                        ft.Tab(label="Matrix", icon=ft.Icons.GRID_ON),
-                        ft.Tab(label="Player Stats", icon=ft.Icons.PERSON),
-                        ft.Tab(label="Round Stats", icon=ft.Icons.QUEUE_MUSIC),
-                        ft.Tab(label="Check Song", icon=ft.Icons.MUSIC_NOTE)
-                    ]
-                ),
-                ft.TabBarView(
-                    expand=True,
-                    controls=[
-                        standings_container,
-                        matrix_container,
-                        profiles_container,
-                        rounds_container,
-                        songs_container
-                    ]
-                )
-            ]
-        )
+        controls=[
+            ft.TabBar(
+                tabs=[
+                    ft.Tab(text="Standings", icon=ft.Icons.LEADERBOARD),
+                    ft.Tab(text="Matrix", icon=ft.Icons.GRID_ON),
+                    ft.Tab(text="Player Stats", icon=ft.Icons.PERSON),
+                    ft.Tab(text="Round Stats", icon=ft.Icons.QUEUE_MUSIC),
+                    ft.Tab(text="Check Song", icon=ft.Icons.MUSIC_NOTE)
+                ]
+            ),
+            ft.TabBarView(
+                expand=True,
+                controls=[
+                    standings_container,
+                    matrix_container,
+                    profiles_container,
+                    rounds_container,
+                    songs_container
+                ]
+            )
+        ]
     )
 
     page.add(
@@ -77,10 +71,8 @@ def main(page: ft.Page, start_tab_index = 0):
             expand=True,
             controls=[
                 ft.Container(
-                    # Match the exact margin profile used in your player view
                     margin=ft.Margin(0, 10, 0, 20), 
                     content=ft.Stack(
-                        # Match the exact height parameter of the player view stack
                         height=60,
                         controls=[
                             ft.Row(
@@ -101,7 +93,6 @@ def main(page: ft.Page, start_tab_index = 0):
             ],
         )
     )
-    
     page.update()
 
 def show_loading_page(page: ft.Page):
@@ -129,16 +120,19 @@ def show_loading_page(page: ft.Page):
     page.add(loading_layout)
     return progress_bar, status_text, loading_spinner
 
-
 async def loading(page: ft.Page):
     page.title = "Eric the Data Manager"
     page.theme_mode = ft.ThemeMode.DARK
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
     
     progress_bar, status_text, loading_spinner = show_loading_page(page)
     page.update() 
     
     async def background_crawler_pipeline():
         try:
+            await asyncio.sleep(0.3)
+            
             progress_bar.value = 0.0
             status_text.value = "Checking for new round..."
             page.update() 
@@ -187,21 +181,29 @@ async def loading(page: ft.Page):
             page.update()
             
         except Exception as e:
-            status_text.value = f"Error: {str(e)}"
-            progress_bar.value = 1.0
-            page.update()
-            
+            print(f"Pipeline failure: {e}")
             page.controls.clear()
-            page.add(ft.Text(f"Error during collection pipeline: {str(e)}"))
+            page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+            page.vertical_alignment = ft.MainAxisAlignment.CENTER
+            page.add(
+                ft.Column(
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Icon(ft.Icons.ERROR_OUTLINE, color=ft.Colors.RED, size=50),
+                        ft.Text(f"Error during collection pipeline:\n{str(e)}", size=18, color=ft.Colors.RED, text_align=ft.TextAlign.CENTER)
+                    ]
+                )
+            )
             page.update()
 
     page.run_task(background_crawler_pipeline)
+
 
 if __name__ == "__main__":
     port_to_use = int(os.environ.get("PORT", 8502)) 
     
     ft.run(
-        target=loading, 
+        loading, 
         view=ft.AppView.WEB_BROWSER,  
         port=port_to_use,                     
         host="0.0.0.0",

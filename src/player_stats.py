@@ -30,7 +30,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 width=100,
                 height=100,
                 fit=ft.ImageFit.COVER,
-                border_radius=ft.border_radius.all(50)
+                border_radius=ft.BorderRadius.all(50)
             )
         else:
             avatar = ft.Container(
@@ -38,7 +38,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 height=100,
                 shape=ft.BoxShape.CIRCLE,
                 bgcolor=ft.Colors.GREY_800,
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 content=ft.Icon(ft.Icons.PERSON, size=40, color=ft.Colors.GREY_400)
             )
 
