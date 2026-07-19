@@ -26,4 +26,4 @@ COPY . .
 EXPOSE 8502
 
 # Run the app as a web service bound to all network interfaces
-CMD ["python", "main.py"]
+CMD ["python", "src/main.py"]
