@@ -266,9 +266,8 @@ def generate_profile_tab(page: ft.Page, return_callback):
             visible=False
         )
 
-        player_stats_data = process_player_stats(player, top_songs_data, all_songs_data, round_songs_data, votes_from_data)
+        player_stats_data = read_json("precomputed_stats") or {}
 
-        # --- Reusable Custom Component for Sub-Items (Songs & Voters) ---
         def create_nested_song_card(song_data) -> ft.Column:
             """Standardizes song card hierarchy, inner padding, and voter logs."""
             voter_list_column = ft.Column(spacing=4)
@@ -314,7 +313,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 margin=ft.Margin(0, 0, 0, 15)
             )
 
-        # --- Simple KPI Metric Containers ---
         favorite_player_container = ft.Container(
             content=ft.Row([
                 ft.Icon(ft.CupertinoIcons.HEART_SOLID, color=ft.Colors.RED_400, size=24),
@@ -347,7 +345,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
              margin=ft.Margin(0, 0, 0, 15)
         )
 
-        # --- Complex Stats Metric Containers ---
         best_song = player_stats_data.get("best_song", {})
         best_song_container = ft.Container(
             content=ft.Column(
@@ -369,7 +366,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             margin=ft.Margin(0, 0, 0, 20)
         )
 
-        # Best Round Container
         best_round_dict = player_stats_data.get("best_round", {})
         round_score = best_round_dict.get("score")
         round_id = next((k for k in best_round_dict.keys() if isinstance(k, int)), None)
@@ -394,7 +390,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             margin=ft.Margin(0, 0, 0, 20)
         )
 
-        # Favorite Artist Container
         favorite_artist_dict = player_stats_data.get("favorite_artist", ["Unknown", {"appearances": 0, "songs": []}])
         favorite_artist_name = favorite_artist_dict[0]
         favorite_artist_data = favorite_artist_dict[1]
@@ -418,7 +413,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             margin=ft.Margin(0, 0, 0, 20)
         )
 
-        # Top Artist Container
         top_artist_dict = player_stats_data.get("top_artist", ["Unknown", {"votes": 0, "songs": []}])
         top_artist_name = top_artist_dict[0]
         top_artist_data = top_artist_dict[1]
@@ -442,7 +436,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             margin=ft.Margin(0, 0, 0, 20)
         )
 
-        # --- Final Construction Layout Pipeline ---
         player_stats_list = ft.Container(
             content=ft.Column(
                 controls=[
@@ -489,20 +482,16 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     view_container.visible = False
             
             try:
-                # profile_view.controls[3] is the main layout ft.Row container split
                 main_row_split = profile_view.controls[3]
                 left_menu_container = main_row_split.controls[0]
                 actual_menu_column = left_menu_container.content
 
                 for button in actual_menu_column.controls:
                     if button.content.value == clicked_title:
-                        # Turn only the matching clicked text purple
                         button.content.color = ft.Colors.PURPLE_500
                     else:
-                        # Reset all other text menu targets back to neutral styles
                         button.content.color = default_color
             except (IndexError, AttributeError):
-                # Fallback safeguard option in case your structural indices shift later
                 e.control.content.color = ft.Colors.PURPLE_500
             
             page.update()
