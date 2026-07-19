@@ -246,7 +246,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                         if voter.get("comment"):
                             voter_info.controls.append(
                                 ft.Text(
-                                    f"{" - " + voter.get('comment')}",
+                                    f"{' - ' + voter.get('comment')}",
                                     size=18, 
                                     italic=True,
                                     margin=ft.Margin(8, 0, 8, 0),
@@ -656,7 +656,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     ft.ListTile(
                         leading=avatar,
                         title=ft.Text(str(name), size=22, weight=ft.FontWeight.BOLD),
-                        subtitle=ft.Text(f"Votes: {player_object.get('votes_to', 0)} • Click to view full record card", size=16),
+                        subtitle=ft.Text(f"Votes: {player_object.get('votes_to', 0)} • Click to view full profile", size=16),
                         trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                         on_click=lambda e, p_obj=player_object: get_player_profile(p_obj)
                     )
@@ -697,7 +697,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     ft.ListTile(
                         leading=avatar,
                         title=ft.Text(name, size=22, weight=ft.FontWeight.BOLD),
-                        subtitle=ft.Text(f"Votes: {player_object.get('votes_to', 0)} • Click to view full record card", size=16),
+                        subtitle=ft.Text(f"Votes: {player_object.get('votes_to', 0)} • Click to view full profile", size=16),
                         trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
                         on_click=lambda e, p_obj=player_object: get_player_profile(p_obj)
                     )
