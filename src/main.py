@@ -41,29 +41,34 @@ def main(page: ft.Page, start_tab_index=0):
     rounds_container = generate_rounds_tab(page)
     songs_container = generate_songs_tab(page)
 
-    tab_view = ft.Column(
+    tab_view = ft.Tabs(
+        length=5,
+        selected_index=start_tab_index,
         expand=True,
-        controls=[
-            ft.TabBar(
-                tabs=[
-                    ft.Tab(label="Standings", icon=ft.Icons.LEADERBOARD),
-                    ft.Tab(label="Matrix", icon=ft.Icons.GRID_ON),
-                    ft.Tab(label="Player Stats", icon=ft.Icons.PERSON),
-                    ft.Tab(label="Round Stats", icon=ft.Icons.QUEUE_MUSIC),
-                    ft.Tab(label="Check Song", icon=ft.Icons.MUSIC_NOTE)
-                ]
-            ),
-            ft.TabBarView(
-                expand=True,
-                controls=[
-                    standings_container,
-                    matrix_container,
-                    profiles_container,
-                    rounds_container,
-                    songs_container
-                ]
-            )
-        ]
+        content=ft.Column(
+            expand=True,
+            controls=[
+                ft.TabBar(
+                    tabs=[
+                        ft.Tab(label="Standings", icon=ft.Icons.LEADERBOARD),
+                        ft.Tab(label="Matrix", icon=ft.Icons.GRID_ON),
+                        ft.Tab(label="Player Stats", icon=ft.Icons.PERSON),
+                        ft.Tab(label="Round Stats", icon=ft.Icons.QUEUE_MUSIC),
+                        ft.Tab(label="Check Song", icon=ft.Icons.MUSIC_NOTE)
+                    ]
+                ),
+                ft.TabBarView(
+                    expand=True,
+                    controls=[
+                        standings_container,
+                        matrix_container,
+                        profiles_container,
+                        rounds_container,
+                        songs_container
+                    ]
+                )
+            ]
+        )
     )
 
     page.add(
