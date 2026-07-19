@@ -22,6 +22,7 @@ class Player:
         self.name = name
         self.votes_to = votes_to
         self.wins = 0
+        self.avatar = ""
 
 class Round:
     """

@@ -1,5 +1,5 @@
 """
-SheetManager.py - Google Sheets integration module for ML WebCrawler
+sheet_manager.py - Google Sheets integration module for ML WebCrawler
 
 This module handles communication with Google Sheets to:
 - Retrieve defunct player information
@@ -7,7 +7,7 @@ This module handles communication with Google Sheets to:
 - Generate and post vote matrices
 """
 
-import os.path
+import os
 from typing import List, Dict, Any, Optional
 
 from google.auth.transport.requests import Request
@@ -16,7 +16,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from DataCollection.Objects import Player_Defunct, Song
+from DataCollection.objects import Player_Defunct, Song
 
 # Google Sheets API scope
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -33,22 +33,37 @@ def set_spreadsheet_id(config: Dict[str, Any]) -> None:
         config (Dict[str, Any]): Configuration dictionary containing spreadsheet_id
     """
     global spreadsheet_id 
-    spreadsheet_id = config.get("spreadsheet_id", "")
+    spreadsheet_id = config.get("spreadsheet_id")
 
 def verify_credentials() -> None:
     """
-    Verify and refresh Google API credentials
-    
-    Creates new credentials if they don't exist or are expired
-    
-    Raises:
-        HttpError: If there's an error during credential verification
+    Verify and refresh Google Sheets API credentials.
     """
-    global creds
+    # Get the project root directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    
+    # Set up the credentials file path in the cache directory
+    credentials_file = os.path.join(project_root, 'cache', 'credentials.json')
+    token_file = os.path.join(project_root, 'cache', 'token.json')
+    
 
+    # Check if the credentials file exists
+    if not os.path.exists(credentials_file):
+        raise FileNotFoundError(f"Credentials file not found: {credentials_file}")
+    
+    global creds
+    
     # Check if token file exists
-    if os.path.exists("cache/token.json"):
-        creds = Credentials.from_authorized_user_file("cache/token.json", SCOPES)
+    if os.path.exists(token_file):
+        creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+    
+     # If there's no token or it's expired, get new credentials
+    if not os.path.exists(token_file) or not os.path.getsize(token_file) > 0:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            credentials_file, 
+            SCOPES
+        )
     
     # Refresh credentials if needed
     if not creds or not creds.valid:
@@ -57,12 +72,12 @@ def verify_credentials() -> None:
         else:
             # Generate new credentials
             flow = InstalledAppFlow.from_client_secrets_file(
-                "cache/credentials.json", SCOPES
+                credentials_file, SCOPES
             )
             creds = flow.run_local_server(port=0)
         
         # Save credentials to file
-        with open("cache/token.json", "w") as token:
+        with open(credentials_file, "w") as token:
             token.write(creds.to_json())
 
 def parse_players(values: List[List[str]], active_players: List[List[str]]) -> List[Player_Defunct]:
@@ -183,7 +198,7 @@ def post_player_sheet(players: List[Dict[str, Any]], songs: List[Dict[str, Any]]
         data_payloads = []
         
         # Define column ranges for player data (14 columns for 13 players)
-        ranges = ["A:B", "C:D", "E:F", "G:H", "I:J", "K:L", "M:N", "O:P", "Q:R", "S:T", "U:V", "W:X", "Y:Z", "AA:AB"]
+        ranges = ["A:B", "C:D", "E:F", "G:H", "I:J", "K:L", "M:N", "O:P", "Q:R", "S:T", "U:V", "W:X", "Y:Z", "AA:AB", "AC:AD"]
         
         # Process each player
         for j, player in enumerate(players):
@@ -314,7 +329,7 @@ def post_vote_matrix(vm_rounds: List[Dict[str, Any]]) -> None:
         print(f"An error occurred: {err}")
 
 def post_master_matrix(matrix_data):
-    print("Preparing data to be written as vote matrix")
+    print("Writing to main matrix")
     global creds
     global spreadsheet_id
 

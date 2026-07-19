@@ -1,11 +1,11 @@
 [project]
-name = "ml-webcrawler"
+name = "Eric"
 version = "0.1.0"
-description = ""
+description = "Music League Webcrawler and Stat Organizer"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Flet developer", email = "you@example.com" }
+    { name = "ioicaleb", email = "ioicaleb12@gmail.com" }
 ]
 dependencies = [
     "flet>=0.86.0"
@@ -26,7 +26,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.flet]
-desktop_flavor = "light"    # Change to "full" to use flet-audio and flet-video
+desktop_flavor = "full"    # Change to "full" to use flet-audio and flet-video
 org = "com.mycompany"
 product = "ml-webcrawler"
 company = "Flet"
@@ -34,3 +34,9 @@ copyright = "Copyright (C) 2023-2026 by Flet"
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.metadata]
+title = "Eric"
+controls = ["SafeArea", "Column", "Container", "Text", "ListTile", "Icon", "AppBar", "Row"]
+layout_pattern = "gallery"
+complexity = "basic"

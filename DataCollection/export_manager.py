@@ -1,5 +1,5 @@
 """
-ExportManager.py - Data export module for ML WebCrawler
+export_manager.py - Data export module for ML WebCrawler
 
 This module handles exporting data from the ML WebCrawler to JSON files:
 - Exporting player information
@@ -7,8 +7,8 @@ This module handles exporting data from the ML WebCrawler to JSON files:
 - Exporting round information
 """
 
-from DataCollection.Objects import Player
-from DataCollection.JSONManager import *
+from DataCollection.objects import Player
+from DataCollection.json_manager import *
 
 # Global variable to cache songs data
 songs = []
@@ -52,6 +52,7 @@ def export_players(rounds: list) -> list:
         list: Sorted list of player dictionaries
     """
     players = []
+    avatars = read_json("avatars")
     
     # Process each round
     for round_obj in rounds:
@@ -76,6 +77,11 @@ def export_players(rounds: list) -> list:
             # Add new player or update existing one
             if not existing_player:
                 player.wins = 0
+                
+                for avatar in avatars:
+                    if avatar.get("name") == player.name:
+                        player.avatar = avatar.get("url")
+                        break
                 players.append(player.__dict__)
             else:
                 # Update existing player's votes
