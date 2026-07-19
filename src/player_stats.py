@@ -172,7 +172,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     ft.Container(
                         content = ft.Text(song_details, size=20),
                         padding =ft.Padding(0, 0, 0, 15),
-                        width = page.window.width / 2
+                        width = page.width / 2
                     )
                 )
 
@@ -244,7 +244,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                                     size=18, 
                                     italic=True,
                                     margin=ft.Margin(8, 0, 8, 0),
-                                    width = page.window.width / 2
+                                    width = page.width / 2
                                 )
                             )
                         
