@@ -1,7 +1,6 @@
 import flet as ft
 from DataProcessing.data_processor import *
 
-
 def generate_profile_tab(page: ft.Page, return_callback):
     profiles_list = ft.ListView(expand=True, spacing=10, padding=10)
 
@@ -20,27 +19,19 @@ def generate_profile_tab(page: ft.Page, return_callback):
             on_click= lambda e: (return_to_players(e))
         )
 
-        player_name = player.get("name")
+        player_stats_dict = read_json("precomputed_stats") or {}
 
-        avatar_url = player.get("url")
+        player_stats_data = player_stats_dict.get(player.get("name"), {})
+        local_img_path = player_stats_data.get("avatar_url")
 
-        if avatar_url and avatar_url.startswith("http"):
+        if local_img_path:
             avatar = ft.Image(
-                src=avatar_url,
+                src=local_img_path,
                 width=100,
-                height=100,
-                fit=ft.ImageFit.COVER,
-                border_radius=ft.BorderRadius.all(50)
+                height=100
             )
         else:
-            avatar = ft.Container(
-                width=100,
-                height=100,
-                shape=ft.BoxShape.CIRCLE,
-                bgcolor=ft.Colors.GREY_800,
-                alignment=ft.Alignment.CENTER,
-                content=ft.Icon(ft.Icons.PERSON, size=40, color=ft.Colors.GREY_400)
-            )
+            avatar = ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=100, color=ft.Colors.GREY_600)
 
         top_songs_list = ft.Container(
             content = ft.Column(
@@ -266,7 +257,9 @@ def generate_profile_tab(page: ft.Page, return_callback):
             visible=False
         )
 
-        player_stats_data = read_json("precomputed_stats") or {}
+        player_stats_dict = read_json("precomputed_stats") or {}
+
+        player_stats_data = player_stats_dict.get(player.get("name"), {})
 
         def create_nested_song_card(song_data) -> ft.Column:
             """Standardizes song card hierarchy, inner padding, and voter logs."""
@@ -368,7 +361,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
         best_round_dict = player_stats_data.get("best_round", {})
         round_score = best_round_dict.get("score")
-        round_id = next((k for k in best_round_dict.keys() if isinstance(k, int)), None)
+        round_id = next((k for k in best_round_dict.keys() if k != "score"), None)
         best_round = best_round_dict.get(round_id, {}) if round_id else {}
 
         best_round_songs_column = ft.Column(spacing=10)
@@ -448,7 +441,8 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     points_per_vote_container,
                     number_of_comments_container
                 ],
-                scroll=ft.ScrollMode.AUTO,
+                scroll=ft.ScrollMode.HIDDEN,
+                expand = True
             ),
             alignment=ft.Alignment.TOP_LEFT,
             expand=True
@@ -557,7 +551,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                     controls=[
                         avatar,
                         ft.Column([
-                            ft.Text(player_name, size=32, weight=ft.FontWeight.BOLD),
+                            ft.Text(player.get('name'), size=32, weight=ft.FontWeight.BOLD),
                             ft.Text(f"{player.get('position')} - Votes: {player.get('votes_to')}", size=20)
                         ])
                     ],
@@ -615,11 +609,17 @@ def generate_profile_tab(page: ft.Page, return_callback):
             if isinstance(player_object, dict):
                 if "name" not in player_object:
                     player_object["name"] = name
-                player_avatar = get_player_avatar(player_object.get("name"))
-                if player_avatar:
+                
+                player_stats_dict = read_json("precomputed_stats") or {}
+
+                player_stats_data = player_stats_dict.get(name, {})
+
+                local_img_path = player_stats_data.get("avatar_url")
+
+                if local_img_path:            
                     avatar = ft.Container(
-                        content=ft.Image(
-                            src= player_object.get("avatar"),
+                        content= ft.Image(
+                            src=local_img_path,
                             fit="cover",
                             border_radius=25,
                             width=80
@@ -649,11 +649,16 @@ def generate_profile_tab(page: ft.Page, return_callback):
         for player_object in players_data:
             if isinstance(player_object, dict):
                 name = player_object.get("name") or player_object.get("player") or "Unknown"
-                player_avatar = get_player_avatar(player_object.get("name"))
-                if player_avatar:
+                player_stats_dict = read_json("precomputed_stats") or {}
+
+                player_stats_data = player_stats_dict.get(name, {})
+
+                local_img_path = player_stats_data.get("avatar_url")
+
+                if local_img_path:            
                     avatar = ft.Container(
-                        content=ft.Image(
-                            src= player_object.get("avatar"),
+                        content= ft.Image(
+                            src=local_img_path,
                             fit="cover",
                             border_radius=25,
                             width=80

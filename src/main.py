@@ -142,7 +142,7 @@ async def loading(page: ft.Page):
             status_text.value = "Checking for new round..."
             page.update() 
             
-            if not check_date() and read_json("rounds"):
+            if not check_date() and read_json("rounds") and read_json("precomputed_stats"):
                 progress_bar.value = 1.0
                 status_text.value = "Up to Date"
                 page.update()
@@ -174,6 +174,9 @@ async def loading(page: ft.Page):
             page.update()
 
             await asyncio.to_thread(analyze_stats)
+
+            from cache_builder import build_static_dashboard_cache
+            await asyncio.to_thread(build_static_dashboard_cache)
 
             save_app_data()
             page.controls.clear()
