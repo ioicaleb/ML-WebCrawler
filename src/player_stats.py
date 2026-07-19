@@ -171,9 +171,9 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 for voter in voters:
                     if voter["name"] == player.get("name"):
                         voter_data = voter
-                        song_details += f"\nYou gave it {voter_data["votes"]} votes"
+                        song_details += f"\nYou gave it {voter_data['votes']} votes"
                         if voter.get("comment"):
-                            song_details += f"\nComment: {voter.get("comment")}"
+                            song_details += f"\nComment: {voter.get('comment')}"
                 votes_from_list.content.controls.append(
                     ft.Container(
                         content = ft.Text(song_details, size=20),
@@ -206,7 +206,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 vote_round_block = ft.Column(
                     controls=[
                         ft.Text(
-                            f"Round {vote_round_item.get('round_id')} - {vote_round_item.get("title")}:", 
+                            f"Round {vote_round_item.get('round_id')} - {vote_round_item.get('title')}:", 
                             size=22, 
                             weight=ft.FontWeight.BOLD
                         ),
@@ -238,7 +238,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                             expand = True
                         )
                     for voter in song["voters"]:
-                        voter_stats = ft.Text(f"{voter.get("name")}{":  " + str(voter.get("votes")) if voter.get("name") != song.get("player_name") and voter.get("votes") else ""}", size=18)
+                        voter_stats = ft.Text(f"{voter.get('name')}{":  " + str(voter.get("votes")) if voter.get("name") != song.get("player_name") and voter.get("votes") else ""}", size=18)
                         voter_info = ft.Column(
                                 controls = [voter_stats],
                                 spacing = 2
@@ -246,7 +246,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                         if voter.get("comment"):
                             voter_info.controls.append(
                                 ft.Text(
-                                    f"{" - " + voter.get("comment")}",
+                                    f"{" - " + voter.get('comment')}",
                                     size=18, 
                                     italic=True,
                                     margin=ft.Margin(8, 0, 8, 0),
@@ -475,11 +475,11 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
         views_map = {
             "Favorite Songs": top_songs,
-            f"{player.get("name")}'s Songs": all_songs,
+            f"{player.get('name')}'s Songs": all_songs,
             "Songs By Round": round_songs,
             "How You Voted": votes_from,
             "Who Voted for You": votes_to,
-            f"{player.get("name")}'s Stats": player_stats
+            f"{player.get('name')}'s Stats": player_stats
         }
 
         def handle_menu_click(e):
