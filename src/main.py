@@ -32,8 +32,8 @@ def main(page: ft.Page, start_tab_index=0):
         tooltip="Toggle theme"
     )
 
-    def return_callback(page_obj, index):
-        main(page_obj, start_tab_index=index)
+    def return_callback(page_obj):
+        main(page_obj, start_tab_index=2)
     
     standings_container = generate_standings_tab(page)
     matrix_container = generate_matrix_tab(page)
@@ -142,7 +142,7 @@ async def loading(page: ft.Page):
             status_text.value = "Checking for new round..."
             page.update() 
             
-            if not check_date() and read_json("rounds") and read_json("precomputed_stats"):
+            if not check_date() and read_json("rounds"):
                 progress_bar.value = 0.5
                 status_text.value = "Up to Date"
                 page.update()

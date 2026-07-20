@@ -43,9 +43,9 @@ def build_static_dashboard_cache():
     
     players = read_json("players") or []
     
-    cached_dashboard = {}
     
     for player in players:
+        cached_dashboard = {}
         player_name = player.get("name")
         top_songs_data = find_top_songs(player_name) or []
         all_songs_data = find_songs_by_submitter(player_name) or []
@@ -65,10 +65,14 @@ def build_static_dashboard_cache():
             votes_from_data
         )
         
+        player_stats_data["top_songs"] = top_songs_data or []
+        player_stats_data["all_songs"] = all_songs_data or []
+        player_stats_data["rounds_songs"] = round_songs_data or {}
+        player_stats_data["votes_from"] = votes_from_data or []
         player_stats_data["avatar_url"] = local_web_path
         cached_dashboard[player_name] = player_stats_data
         
-    write_json(data = cached_dashboard, filename="precomputed_stats")
+        write_json(data = cached_dashboard, filename=f"precomputed_stats_{player_name}")
         
     print(f"Success! Generated master cache")
 

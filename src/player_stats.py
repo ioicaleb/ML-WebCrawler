@@ -6,13 +6,10 @@ def generate_profile_tab(page: ft.Page, return_callback):
     profiles_list = ft.ListView(expand=True, spacing=10, padding=10)
 
     players_data = get_players()
-    
-    master_profiles_view = ft.Container(content=profiles_list, expand=True)
 
     def return_to_players(e):
         page.controls.clear()
-        page.add(master_profiles_view)
-        page.update()
+        return_callback(page)
 
     async def get_player_profile(player: dict):
         page.splash = ft.ProgressBar()
@@ -20,14 +17,14 @@ def generate_profile_tab(page: ft.Page, return_callback):
 
         name = player.get("name")
 
-        player_stats_dict = await asyncio.to_thread(read_json, "precomputed_stats")
+        player_stats_dict = await asyncio.to_thread(read_json, f"precomputed_stats_{name}")
         player_stats_data = player_stats_dict.get(name, {}) if player_stats_dict else {}
 
-        top_songs_data = await asyncio.to_thread(find_top_songs, name)
-        all_songs_data = await asyncio.to_thread(find_songs_by_submitter, name)
-        round_songs_data = await asyncio.to_thread(find_player_songs_by_round, name)
-        votes_from_data = await asyncio.to_thread(find_songs_by_voter, name)
-        votes_to_data = await asyncio.to_thread(find_player_songs_by_round, name)
+        top_songs_data = player_stats_data.get("top_songs") or {}
+        all_songs_data = player_stats_data.get("all_songs") or {}
+        round_songs_data = player_stats_data.get("rounds_songs") or {}
+        votes_from_data = player_stats_data.get("votes_from") or {}
+        votes_to_data = round_songs_data.copy()
 
         page.splash = None
         page.controls.clear()
@@ -37,10 +34,6 @@ def generate_profile_tab(page: ft.Page, return_callback):
             icon=ft.Icons.ARROW_BACK,
             on_click= lambda e: (return_to_players(e))
         )
-
-        player_stats_dict = read_json("precomputed_stats") or {}
-
-        player_stats_data = player_stats_dict.get(player.get("name"), {})
         local_img_path = player_stats_data.get("avatar_url")
 
         if local_img_path:
@@ -267,7 +260,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
             visible=False
         )
 
-        player_stats_dict = read_json("precomputed_stats") or {}
+        player_stats_dict = read_json(f"precomputed_stats_{player.get('name')}") or {}
 
         player_stats_data = player_stats_dict.get(player.get("name"), {})
 
@@ -617,7 +610,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
                 if "name" not in player_object:
                     player_object["name"] = name
                 
-                player_stats_dict = read_json("precomputed_stats") or {}
+                player_stats_dict = read_json(f"precomputed_stats_{name}") or {}
 
                 player_stats_data = player_stats_dict.get(name, {})
 
@@ -656,7 +649,7 @@ def generate_profile_tab(page: ft.Page, return_callback):
         for player_object in players_data:
             if isinstance(player_object, dict):
                 name = player_object.get("name") or player_object.get("player") or "Unknown"
-                player_stats_dict = read_json("precomputed_stats") or {}
+                player_stats_dict = read_json(f"precomputed_stats_{name}") or {}
 
                 player_stats_data = player_stats_dict.get(name, {})
 
