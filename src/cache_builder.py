@@ -1,4 +1,4 @@
-from DataCollection.json_manager import read_json, write_json
+from DataProcessing.json_manager import read_json, write_json
 from DataProcessing.data_processor import *
 import os,requests, io
 from PIL import Image
@@ -9,13 +9,11 @@ def download_avatar_locally(url, player_name):
         return None
         
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    # Save directly inside the root-level assets/avatars/ folder
     avatar_dir = os.path.join(base_dir, "assets/avatars")
     os.makedirs(avatar_dir, exist_ok=True)
     
     output_path = os.path.join(avatar_dir, f"{player_name}.png")
     
-    # Skip downloading if the image file already exists locally
     if os.path.exists(output_path):
         return f"/avatars/{player_name}.png"
         
@@ -24,14 +22,11 @@ def download_avatar_locally(url, player_name):
         if response.status_code == 200:
             img = Image.open(io.BytesIO(response.content))
             
-            # Convert to RGB if it's in CMYK or RGBA mode to ensure clean compressing
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
                 
-            # Downscale the massive profile image down to standard dashboard thumbnail resolution
             img.thumbnail((150, 150), Image.Resampling.LANCZOS)
             
-            # Save as an optimized, compressed JPEG/PNG file
             img.save(output_path, "JPEG", quality=80) 
 
             return f"/avatars/{player_name}.png"

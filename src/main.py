@@ -1,8 +1,7 @@
 import asyncio
 import inspect
 import os
-from DataCollection.data_collector import collect_data, new_round_check, analyze_stats
-from DataCollection.json_manager import *
+from DataProcessing.json_manager import *
 from DataProcessing.data_processor import *
 from player_stats import generate_profile_tab
 from matrix import generate_matrix_tab
@@ -139,40 +138,16 @@ async def loading(page: ft.Page):
             await asyncio.sleep(0.3)
             
             progress_bar.value = 0.0
-            status_text.value = "Checking for new round..."
-            page.update() 
-            
-            if not check_date() and read_json("rounds"):
-                progress_bar.value = 0.5
-                status_text.value = "Up to Date"
-                page.update()
-
-            else:
-                progress_bar.value = 0.1
-                status_text.value = "Starting data collection..."
-                page.update() 
-                
-                await asyncio.to_thread(collect_data)
-                
-                progress_bar.value = 0.3
-                status_text.value = "Processing collected data..."
-                page.update()
-
-                await asyncio.to_thread(new_round_check)
-                
-                progress_bar.value = 0.5
-                status_text.value = "Loading data into UI..."
-                page.update()
-
-                await asyncio.to_thread(analyze_stats)
+            status_text.value = "Starting..."
+            page.update()
 
             from cache_builder import build_static_dashboard_cache
-            progress_bar.value = 0.7
+            progress_bar.value = 0.3
             status_text.value = "Building data cache..."
             page.update()
             await asyncio.to_thread(build_static_dashboard_cache)
 
-            progress_bar.value = 0.9
+            progress_bar.value = 0.6
             status_text.value = "Building search cache..."
             page.update()
             await asyncio.to_thread(init_search_cache)

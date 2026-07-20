@@ -1,4 +1,3 @@
-# DataCollection/JSONManager.py
 import json
 import os
 
@@ -12,7 +11,6 @@ def read_json(filename):
     Returns:
         dict: Parsed JSON data or None if file not found
     """
-    # Get the project root directory (one level up from DataCollection)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     cache_dir = os.path.join(project_root, 'cache')
@@ -40,12 +38,10 @@ def write_json(filename, data):
         filename (str): Name of the JSON file (without .json extension)
         data (dict or list): Data to be written to the file
     """
-    # Get the project root directory (one level up from DataCollection)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     cache_dir = os.path.join(project_root, 'cache')
     
-    # Ensure cache directory exists
     os.makedirs(cache_dir, exist_ok=True)
     
     file_path = os.path.join(cache_dir, f"{filename}.json")

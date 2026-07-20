@@ -1,6 +1,5 @@
 import flet as ft
 from DataProcessing.search_processor import search_songs
-import asyncio
 
 search_task = None
 
@@ -26,11 +25,13 @@ def generate_songs_tab(page: ft.Page):
         status_text.value = f"Searching for '{keyword}'..."
         page.update()
 
-        songs_data = []
-        songs_data.extend(search_songs(keyword))
-
         titles_list = set()
         unique_results = []
+
+        songs_data = search_songs(keyword)
+        max_results = 100
+        songs_data = songs_data[:max_results]
+
         for song in songs_data:
             title = song.get("name")
             if title not in titles_list:
@@ -50,12 +51,12 @@ def generate_songs_tab(page: ft.Page):
             album = song.get("album")
 
             song_card = ft.Container(
-                content = ft.Column(
-                    controls= [
+                content=ft.Column(
+                    controls=[
                         ft.Row(
-                            controls = [
-                                ft.Icon(ft.Icons.AUDIOTRACK, size = 22, color= ft.Colors.BLUE_400),
-                                ft.Text(title, size = 24, weight=ft.FontWeight.W_500)
+                            controls=[
+                                ft.Icon(ft.Icons.AUDIOTRACK, size=22, color=ft.Colors.BLUE_400),
+                                ft.Text(title, size=24, weight=ft.FontWeight.W_500)
                             ]
                         ),
                         ft.Row(
@@ -84,6 +85,7 @@ def generate_songs_tab(page: ft.Page):
                 border = ft.BorderSide(width = 1, color=ft.Colors.GREY_800)
             )
             results_list.controls.append(song_card)
+        page.update()
 
     search_input = ft.TextField(
         label = "Search songs, artists or albums",

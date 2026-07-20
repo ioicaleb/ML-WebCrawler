@@ -1,5 +1,5 @@
 import datetime
-from DataCollection.json_manager import *
+from DataProcessing.json_manager import *
 from DataProcessing.search_processor import *
 from fastapi import FastAPI
 
@@ -52,18 +52,6 @@ def process_standings():
         data.append(f"{medal}{name} - Votes: {votes}")
     
     return data
-
-
-def check_date():
-    try:
-        app_data = read_json("app_data")
-        if app_data:
-            app_data_date = datetime.datetime.fromisoformat(app_data.get("date", ""))
-            if app_data_date.date() >= datetime.date.today() - datetime.timedelta(days=7):
-                        return False
-    except:
-        pass
-    return True
 
 def save_app_data():
     """Save the timestamp of when data was last collected"""
