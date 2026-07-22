@@ -118,29 +118,66 @@ def generate_rounds_tab(page: ft.Page):
         controls=[],
         alignment=ft.MainAxisAlignment.START,
         spacing=15,
-        scroll=ft.ScrollMode.HIDDEN
+        scroll= ft.ScrollMode.HIDDEN,
+        expand = True
     )
 
-    for i, title in enumerate(views_map.keys()):
-        navigation_menu.controls.append(
-            ft.TextButton(
-                content=ft.Text(
-                    title, 
-                    size=24, 
-                    weight=ft.FontWeight.BOLD,
-                    color=ft.Colors.ON_SURFACE,
-                ),
-                on_click=handle_menu_click,
-                style=ft.ButtonStyle(padding=0)
+    def create_menu_button(title):
+        return ft.TextButton(
+            content=ft.Text(
+                title, 
+                size=24, 
+                weight=ft.FontWeight.BOLD,
+                color=ft.Colors.ON_SURFACE,
+            ),
+            on_click=handle_menu_click,
+            style=ft.ButtonStyle(padding=0)
+    )
+
+    for title in views_map.keys():
+        navigation_menu.controls.append(create_menu_button(title))
+
+    def search_rounds(e = None):
+        keyword = search_input.value.strip().lower()
+        navigation_menu.controls.clear()
+        for title in views_map.keys():
+            if not keyword or keyword.lower() in title.lower():
+                navigation_menu.controls.append(create_menu_button(title))
+        navigation_menu.update()
+
+    search_input = ft.TextField(
+                label = "Search round number or title",
+                prefix_icon= ft.Icons.SEARCH,
+                expand= True,
+                on_change = search_rounds,
+                on_submit = search_rounds
             )
+
+    clear_button = ft.IconButton(
+            icon = ft.Icons.CLEAR,
+            tooltip = "Clear search",
+            on_click = lambda _: (setattr(search_input, "value", ""), search_rounds(None))
         )
+
+    sidebar_layout = ft.Column(
+        controls=[
+            ft.Row(
+                controls=[search_input, clear_button],
+                alignment=ft.MainAxisAlignment.START,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER
+            ),
+            navigation_menu # This handles its own scrolling now
+        ],
+        spacing=10,
+        expand=True # Ensures the sidebar expands vertically
+    )
 
     main_view = ft.Row(
         vertical_alignment=ft.CrossAxisAlignment.START,
         controls=[
             ft.Container(
-                content=navigation_menu,
-                width=180,
+                content=sidebar_layout,
+                width=360,
                 margin=ft.Margin(20, 10, 0, 0)
             ),
             ft.VerticalDivider(width=40, color=ft.Colors.TRANSPARENT),
