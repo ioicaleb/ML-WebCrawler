@@ -33,7 +33,7 @@
       "command": "bash",
       "args": [
         "-c",
-        "cd /mnt/E8A2D79FA2D77114/Source/repos/ML_WebCrawler/build/flutter && export PATH=\"$PATH:$HOME/flutter/3.44.4/bin\" && flutter clean && flutter build linux && cd../.."],
+        "cd /mnt/E8A2D79FA2D77114/Source/repos/Data-Manager-Eric/build/flutter && export PATH=\"$PATH:$HOME/flutter/3.44.4/bin\" && flutter clean && flutter build linux && cd ../.."],
       "group": "build",
       "presentation": {
         "echo": true,

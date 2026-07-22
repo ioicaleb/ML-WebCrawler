@@ -1,13 +1,13 @@
 import asyncio
 import inspect
 import os
-from DataProcessing.json_manager import *
-from DataProcessing.data_processor import *
-from player_stats import generate_profile_tab
-from matrix import generate_matrix_tab
-from standings import generate_standings_tab
-from rounds import generate_rounds_tab
-from song_check import generate_songs_tab
+from data_processing.json_manager import *
+from data_processing.data_processor import *
+from tabs.player_stats import generate_profile_tab
+from tabs.matrix import generate_matrix_tab
+from tabs.standings import generate_standings_tab
+from tabs.rounds import generate_rounds_tab
+from tabs.song_check import generate_songs_tab
 import flet as ft
 
 def main(page: ft.Page, start_tab_index=0): 
@@ -141,7 +141,7 @@ async def loading(page: ft.Page):
             status_text.value = "Starting..."
             page.update()
 
-            from cache_builder import build_static_dashboard_cache
+            from data_processing.cache_builder import build_static_dashboard_cache
             progress_bar.value = 0.3
             status_text.value = "Building data cache..."
             page.update()
