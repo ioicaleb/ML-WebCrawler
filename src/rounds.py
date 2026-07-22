@@ -82,7 +82,7 @@ def generate_rounds_tab(page: ft.Page):
         round_header.controls.append(ft.Text(f"{winners}", size=24))
         round_header.controls.append(ft.Divider(thickness = 1, color=ft.Colors.GREY_100))
 
-        views_map[f"Round {round_item['round_number']}"] = round_view
+        views_map[f"Round {round_item['round_number']} - {round_item['title']}"] = round_view
 
     content_stack = ft.Stack(
         controls=list(views_map.values()),

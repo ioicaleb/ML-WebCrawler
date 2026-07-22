@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-def process_standings():
+def process_standings_votes():
     processed_players = []
     data = []
     players_data = get_players()
@@ -16,6 +16,7 @@ def process_standings():
             key=lambda item: item[1].get("votes_to", 0) if isinstance(item[1], dict) else 0, 
             reverse=True
         )
+
         for key, value in sorted_players:
             if isinstance(value, dict):
                 if "name" not in value:
@@ -28,6 +29,57 @@ def process_standings():
             key=lambda item: item.get("votes_to", 0) if isinstance(item, dict) else 0, 
             reverse=True
         )
+        
+        for item in sorted_players:
+            if isinstance(item, dict):
+                if "name" not in item:
+                    item["name"] = item.get("player") or "Unknown Player"
+                processed_players.append(item)
+            
+        current_position = 1
+        previous_votes = None
+        
+        for index, player_info in enumerate(processed_players):
+            name = player_info.get("name", "Unknown")
+            votes = player_info.get("votes_to", 0)
+            
+            if previous_votes is not None and votes < previous_votes:
+                current_position = index + 1
+    
+            player_info["position"] = f"#{current_position}"
+                
+            previous_votes = votes
+            medal = "🥇 " if current_position == 1 else "🥈 " if current_position == 2 else "🥉 " if current_position == 3 else f"   #{current_position} "
+            
+            data.append(f"{medal}{name} - Votes: {votes}")
+        
+        return data
+
+def process_standings_wins():
+    processed_players = []
+    data = []
+    players_data = get_players()
+
+    if isinstance(players_data, dict):
+        sorted_players = sorted(
+            players_data.items(), 
+            key=lambda item: item[1].get("wins", 0) if isinstance(item[1], dict) else 0, 
+            reverse=True
+        )
+
+        for key, value in sorted_players:
+            if isinstance(value, dict):
+                if "name" not in value:
+                    value["name"] = key
+                processed_players.append(value)
+
+    elif isinstance(players_data, list):
+        sorted_players = sorted(
+            players_data, 
+            key=lambda item: item.get("wins") if isinstance(item, dict) else 0, 
+            reverse=True
+        )
+        
         for item in sorted_players:
             if isinstance(item, dict):
                 if "name" not in item:
@@ -35,21 +87,71 @@ def process_standings():
                 processed_players.append(item)
         
     current_position = 1
-    previous_votes = None
+    previous_wins = None
     
     for index, player_info in enumerate(processed_players):
         name = player_info.get("name", "Unknown")
-        votes = player_info.get("votes_to", 0)
+        wins = player_info.get("wins", 0)
         
-        if previous_votes is not None and votes < previous_votes:
+        if previous_wins is not None and wins < previous_wins:
             current_position = index + 1
 
         player_info["position"] = f"#{current_position}"
             
-        previous_votes = votes
+        previous_wins = wins
         medal = "🥇 " if current_position == 1 else "🥈 " if current_position == 2 else "🥉 " if current_position == 3 else f"   #{current_position} "
         
-        data.append(f"{medal}{name} - Votes: {votes}")
+        data.append(f"{medal}{name} - Wins: {wins}")
+    
+    return data
+
+def process_standings_comments():
+    processed_players = []
+    data = []
+    players_data = get_players()
+
+    if isinstance(players_data, dict):
+        sorted_players = sorted(
+            players_data.items(), 
+            key=lambda item: item[1].get("num_comments", 0) if isinstance(item[1], dict) else 0, 
+            reverse=True
+        )
+
+        for key, value in sorted_players:
+            if isinstance(value, dict):
+                if "name" not in value:
+                    value["name"] = key
+                processed_players.append(value)
+
+    elif isinstance(players_data, list):
+        sorted_players = sorted(
+            players_data, 
+            key=lambda item: item.get("num_comments") if isinstance(item, dict) else 0, 
+            reverse=True
+        )
+        
+        for item in sorted_players:
+            if isinstance(item, dict):
+                if "name" not in item:
+                    item["name"] = item.get("player") or "Unknown Player"
+                processed_players.append(item)
+        
+    current_position = 1
+    previous_comments = None
+    
+    for index, player_info in enumerate(processed_players):
+        name = player_info.get("name", "Unknown")
+        comments = player_info.get("num_comments", 0)
+        
+        if previous_comments is not None and comments < previous_comments:
+            current_position = index + 1
+
+        player_info["position"] = f"#{current_position}"
+            
+        previous_comments = comments
+        medal = "🥇 " if current_position == 1 else "🥈 " if current_position == 2 else "🥉 " if current_position == 3 else f"   #{current_position} "
+        
+        data.append(f"{medal}{name} - Comments: {comments}")
     
     return data
 

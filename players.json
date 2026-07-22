@@ -65,8 +65,7 @@
                 "player": "Tobi",
                 "votes": 74
             }
-        ],
-        "num_comments": 236
+        ]
     },
     {
         "name": "Caleb",
@@ -134,8 +133,7 @@
                 "player": "Tobi",
                 "votes": 88
             }
-        ],
-        "num_comments": 676
+        ]
     },
     {
         "name": "Dorothy",
@@ -203,8 +201,7 @@
                 "player": "Tobi",
                 "votes": 66
             }
-        ],
-        "num_comments": 310
+        ]
     },
     {
         "name": "Lia",
@@ -272,8 +269,7 @@
                 "player": "Tobi",
                 "votes": 155
             }
-        ],
-        "num_comments": 881
+        ]
     },
     {
         "name": "Lindsay",
@@ -341,8 +337,7 @@
                 "player": "Tobi",
                 "votes": 14
             }
-        ],
-        "num_comments": 0
+        ]
     },
     {
         "name": "Magnolia",
@@ -410,8 +405,7 @@
                 "player": "Tobi",
                 "votes": 15
             }
-        ],
-        "num_comments": 0
+        ]
     },
     {
         "name": "Mike",
@@ -479,8 +473,7 @@
                 "player": "Tobi",
                 "votes": 85
             }
-        ],
-        "num_comments": 351
+        ]
     },
     {
         "name": "Nate",
@@ -548,8 +541,7 @@
                 "player": "Tobi",
                 "votes": 75
             }
-        ],
-        "num_comments": 358
+        ]
     },
     {
         "name": "Ola",
@@ -617,8 +609,7 @@
                 "player": "Tobi",
                 "votes": 85
             }
-        ],
-        "num_comments": 431
+        ]
     },
     {
         "name": "Rick",
@@ -686,8 +677,7 @@
                 "player": "Tobi",
                 "votes": 95
             }
-        ],
-        "num_comments": 52
+        ]
     },
     {
         "name": "Rose",
@@ -755,8 +745,7 @@
                 "player": "Tobi",
                 "votes": 63
             }
-        ],
-        "num_comments": 154
+        ]
     },
     {
         "name": "Saa",
@@ -824,8 +813,7 @@
                 "player": "Tobi",
                 "votes": 77
             }
-        ],
-        "num_comments": 1024
+        ]
     },
     {
         "name": "Sarah",
@@ -893,8 +881,7 @@
                 "player": "Tobi",
                 "votes": 79
             }
-        ],
-        "num_comments": 458
+        ]
     },
     {
         "name": "Steve",
@@ -962,8 +949,7 @@
                 "player": "Tobi",
                 "votes": 89
             }
-        ],
-        "num_comments": 610
+        ]
     },
     {
         "name": "Tobi",
@@ -1031,7 +1017,6 @@
                 "player": "Tobi",
                 "votes": 0
             }
-        ],
-        "num_comments": 7
+        ]
     }
 ]
