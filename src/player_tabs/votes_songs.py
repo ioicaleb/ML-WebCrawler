@@ -18,6 +18,7 @@ def generate_votes_songs(player_stats_data, player_name):
         song_details = ft.Container(
             content=ft.Column(controls=[], spacing=10)
         )
+        song_info = None
         song = find_song_by_id(song_id)
         voter_card = song.get("voters")
         for voter in voter_card:
