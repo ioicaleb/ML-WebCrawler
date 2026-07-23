@@ -241,11 +241,12 @@ def process_player_stats(player: dict, top_songs_data: dict, all_songs_data: dic
     for song_id in all_songs_data:
         song = find_song_by_id(song_id)
         if(song.get("votes")) > best_song_score:
+            best_song_score = song.get("votes") 
             data["best_song"] = song_id
         artist = song["artist"]
         if artist not in player_artists:
             player_artists[artist] = {
-                "songs": [song,],
+                "songs": [song],
                 "appearances": 1,
                 "votes": 0
             }
