@@ -226,7 +226,7 @@ def get_votes_from_data(player_name):
     votes_from_data = {}
     votes_songs_data = []
 
-    songs = sorted(songs, key = lambda x: x["artist"], reverse= True)
+    songs = sorted(songs, key = lambda x: x["artist"])
 
     for song in songs:
         if song.get("player_name") != player_name:
