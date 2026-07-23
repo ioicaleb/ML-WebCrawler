@@ -48412,5 +48412,41 @@
                 ]
             }
         ]
+    },
+    {
+        "title": "Second Chances",
+        "round_number": 63,
+        "description": "Other songs from artists you previously submitted that didn't do as well as you hoped",
+        "submissions": [
+            "mik0163",
+            "ste0263",
+            "ric0363",
+            "ola0463",
+            "saa0563",
+            "cal0663",
+            "ola0763",
+            "nat0863",
+            "dor0963",
+            "ros1063",
+            "saa1163",
+            "ama1263",
+            "mik1363",
+            "sar1463",
+            "sar1563",
+            "nat1663",
+            "ste1763",
+            "lia1863",
+            "dor1963",
+            "cal2063",
+            "ama2163",
+            "tob2263",
+            "lia2363",
+            "ros2463",
+            "ric2563",
+            "tob2663"
+        ],
+        "winner": [
+            "Mike"
+        ]
     }
 ]
