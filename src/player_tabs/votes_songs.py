@@ -35,7 +35,7 @@ def generate_votes_songs(player_stats_data, player_name):
                 )
                 if voter.get("comment"):
                     song_info.controls.append(ft.Text(f"Comment: {voter.get('comment')}", size=18))
-            song_details.content.controls.append(song_info)
+                song_details.content.controls.append(song_info)
             break
         
         votes_songs_list.content.controls.append(song_details)
