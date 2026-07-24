@@ -1,6 +1,18 @@
-import asyncio
 import os
-from fastapi import FastAPI, HTTPException, Body
+import sys
+
+# Calculate absolute paths to the project root directory
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) # points to /src
+PROJECT_ROOT = os.path.dirname(CURRENT_DIR)               # points to /Data-Manager-Eric
+
+# Force Python to search the root directory and the src directory for module names
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
+
+import asyncio
+from fastapi import FastAPI
 import flet as ft
 import hashlib
 import flet.fastapi as flet_fastapi
@@ -399,6 +411,6 @@ app.mount(
     flet_fastapi.app(
         loading_gateway,
         web_renderer=ft.WebRenderer.HTML,
-        assets_dir=os.path.join(ROOT_DIR, "assets") # Maps your icons/loading animations safely
+        assets_dir=os.path.join(ROOT_DIR, "assets")
     )
 )
