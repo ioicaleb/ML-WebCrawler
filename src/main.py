@@ -353,7 +353,13 @@ async def loading_gateway(page: ft.Page):
                                 ft.Text("View live leaderboards, vote matrices, track profiles, and round stats instantly.", size=12, color="grey"),
                                 ft.Container(height=48),
                                 # Spacer spacing balance
-                                ft.ElevatedButton("View Analytics", on_click=lambda _: page.run_task(execute_portal_pipeline, False), icon=ft.Icons.VIEW_AGENDA, bgcolor="blue700", color="white")
+                                ft.ElevatedButton(
+                                    "View Analytics", 
+                                    on_click=lambda e: page.run_task(execute_portal_pipeline, False), 
+                                    icon=ft.Icons.VIEW_AGENDA, 
+                                    bgcolor="blue700", 
+                                    color="white"
+                                )
                             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         )
                     ),
@@ -367,7 +373,13 @@ async def loading_gateway(page: ft.Page):
                                 admin_password_field,
                                 cookie_field,
                                 browser_dropdown,
-                                ft.ElevatedButton("Force Crawl / Sync Data", on_click=lambda _: page.run_task(execute_portal_pipeline, True), icon=ft.Icons.RUN_CIRCLE, bgcolor="amber700", color="white")
+                                ft.ElevatedButton(
+                                    "Force Crawl / Sync Data", 
+                                    on_click=lambda e: page.run_task(execute_portal_pipeline, True), 
+                                    icon=ft.Icons.RUN_CIRCLE, 
+                                    bgcolor="amber700", 
+                                    color="white"
+                                )
                             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10)
                         )
                     )
@@ -377,4 +389,10 @@ async def loading_gateway(page: ft.Page):
     )
     page.update()
 
-app.mount("/", flet_fastapi.app(loading_gateway))
+app.mount(
+    "/", 
+    flet_fastapi.app(
+        loading_gateway,
+        web_renderer=ft.WebRenderer.HTML
+    )
+)
