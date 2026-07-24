@@ -1,0 +1,2 @@
+browser = ""
+league_id = ""
