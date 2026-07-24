@@ -1,11 +1,6 @@
 class Player:
     """
     Represents an active player in the league.
-    
-    Attributes:
-        name (str): The player's name
-        votes_to (int): The number of votes this player has given to others
-        wins (int): The number of rounds this player has won
     """
     def __init__(self, name="", votes_to=0):
         self.name = name
@@ -16,16 +11,6 @@ class Player:
 class Round:
     """
     Represents a round in the league.
-    
-    A round consists of multiple song submissions, with a winner determined
-    based on the number of votes each submission received.
-    
-    Attributes:
-        title (str): The title of the round
-        round_number (int): The round number
-        description (str): A description of the round
-        submissions (list): List of Song objects submitted for this round
-        winner (list): List of player names who won this round
     """
     def __init__(self, title, round_number, description, submissions):
         self.title = title
@@ -35,26 +20,12 @@ class Round:
         self.winner = self.determine_winner(submissions)
     
     def determine_winner(self, submissions):
-        """
-        Determine the winner(s) of the round based on votes.
-        
-        The winner is determined by finding all submissions with the maximum
-        number of votes. If multiple submissions have the same maximum votes,
-        all are considered winners.
-        
-        Args:
-            submissions (list): List of Song objects for this round
-            
-        Returns:
-            list: List of player names who won this round
-        """
         if not submissions:
             return []
             
         winners = []
         max_votes = submissions[0].votes
         
-        # Find all submissions with maximum votes
         for submission in submissions:
             if submission.votes == max_votes:
                 winners.append(submission.player_name)
@@ -66,11 +37,6 @@ class Round:
 class Voter:
     """
     Represents a voter who casts votes in the league.
-    
-    Attributes:
-        name (str): The voter's name
-        votes (int): The number of votes this voter has cast
-        comment (str): Any additional comment from the voter
     """
     def __init__(self, name, votes, comment=""):
         self.name = name
@@ -80,42 +46,38 @@ class Voter:
 class Song:
     """
     Represents a song submitted to a round.
-    
-    Attributes:
-        name (str): The name of the song
-        artist (str): The artist of the song
-        album (str): The album the song is from
-        player_name (str): The name of the player who submitted the song
-        votes (int): The total number of votes the song received
-        voters (list): List of Voter objects who voted for this song
     """
-    def __init__(self, name, votes=0, player_name=None, artist=None, album=None, voters=[]):
+    def __init__(self, name, votes=0, player_name=None, artist=None, album=None, voters=None):
         self.name = name
         self.artist = artist
         self.album = album
         self.player_name = player_name
         self.votes = votes
-        self.voters = voters
+        # Avoid mutable default arguments ([]) in Python to prevent cross-instance memory leaks
+        self.voters = voters if voters is not None else []
 
 def convert_username_to_name(username, players):
     """
     Convert a username to a player name.
     
-    This function attempts to find the corresponding player name for a given
-    username, checking players.
-    
     Args:
         username (str): The username to convert
-        players (list): List of tuples (username, player_name) for active players
-        name (str): The name of the song to search for
+        players (list/dict): Collection or lookup of usernames to player names
         
     Returns:
         str: The corresponding player name, or the username if not found
     """
-    # Check active players first
+    if not players:
+        return username
+
+    # If the backend feeds a dictionary structure from PostgreSQL:
+    if isinstance(players, dict):
+        return players.get(username, username)
+
+    # Fallback iteration if players is a list of tuples/lists
     for player in players:
-        if username == player[0]:
-            return player[1]
+        if isinstance(player, (list, tuple)) and len(player) >= 2:
+            if username == player[0]:
+                return player[1]
     
-    # Return default if no match found
     return username

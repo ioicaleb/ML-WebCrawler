@@ -1,55 +1,52 @@
-from data_processing.json_manager import read_json, write_json
-from data_processing.data_processor import *
-import os,requests, io
-from PIL import Image
+f"""
+cache_builder.py - Cloud-optimized Master Statistics Compiler
 
-def download_avatar_locally(url, player_name):
-    """Downloads an external avatar image and saves it locally in assets."""
-    if not url:
-        return None
-        
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    avatar_dir = os.path.join(base_dir, "assets/avatars")
-    os.makedirs(avatar_dir, exist_ok=True)
-    
-    output_path = os.path.join(avatar_dir, f"{player_name}.png")
-    
-    if os.path.exists(output_path):
-        return f"/avatars/{player_name}.png"
-        
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            img = Image.open(io.BytesIO(response.content))
-            
-            if img.mode in ("RGBA", "P"):
-                img = img.convert("RGB")
-                
-            img.thumbnail((150, 150), Image.Resampling.LANCZOS)
-            
-            img.save(output_path, "JPEG", quality=80) 
+This module handles pre-computing the exhaustive personal statistics sub-tabs 
+for every single player in a music league tournament session.
+"""
 
-            return f"/avatars/{player_name}.png"
-    except Exception as e:
-        print(f"Could not optimize asset for {player_name}: {e}")
+# FIXED: Re-routed imports from data_processor to the correct search_processor module path
+from data_processing.search_processor import (
+    find_top_songs, 
+    find_songs_by_submitter, 
+    find_player_songs_by_round, 
+    get_votes_from_data
+)
+from data_processing.data_processor import process_player_stats
 
-def build_static_dashboard_cache():
-    print("Starting local stats pre-computation...")
+def build_static_dashboard_cache(cached_db_data: dict) -> dict:
+    """
+    Accepts raw structures directly from PostgreSQL data states, 
+    pre-computes statistical tabs inside memory maps, and returns 
+    a master dictionary payload ready for DB storage.
+    """
+    print("Starting containerized master stats pre-computation...")
     
-    players = read_json("players") or []
+    # Read variables from our incoming PostgreSQL memory payload 
+    # instead of hitting disk-bound read_json("players")
+    players = cached_db_data.get("players", [])
+    
+    # This dictionary replaces your old separate local JSON files
+    # e.g., precomputed_stats_playername.json
+    all_players_precomputed_stats = {}
     
     for player in players:
-        cached_dashboard = {}
         player_name = player.get("name")
-        top_songs_data = find_top_songs(player_name) or []
-        all_songs_data = find_songs_by_submitter(player_name) or []
-        round_songs_data = find_player_songs_by_round(player_name) or {}
-        votes_data = get_votes_from_data(player_name) or {}
         if not player_name:
             continue
+            
+        # Execute your reliable data processor lookup loops out of search_processor
+        top_songs_data = find_top_songs(player_name) or []
+        all_songs_data = find_songs_by_submitter(player_name) or []
+        round_songs_data = find_player_songs_by_round(player_name) or []
+        votes_data = get_votes_from_data(player_name) or {}
 
+        # -------------------------------------------------------------
+        # IMAGE AVATAR CLOUD BYPASS
+        # -------------------------------------------------------------
+        # We retain the external Spotify/MusicLeague image URL string. 
+        # Flet's ft.Image(src=url) natively supports loading external web URLs out of the box!
         remote_url = player.get("avatar")
-        local_web_path = download_avatar_locally(remote_url, player_name)
         
         player_stats_data = process_player_stats(
             player, 
@@ -58,18 +55,21 @@ def build_static_dashboard_cache():
             round_songs_data, 
             votes_data
         )
-        player["num_comments"] = player_stats_data.get("comments")
+        
+        player["num_comments"] = player_stats_data.get("comments", 0)
         
         player_stats_data["top_songs"] = top_songs_data or []
         player_stats_data["all_songs"] = all_songs_data or []
-        player_stats_data["rounds_songs"] = round_songs_data or {}
-        player_stats_data["avatar_url"] = local_web_path
-        cached_dashboard[player_name] = player_stats_data
+        player_stats_data["rounds_songs"] = round_songs_data or []
+        player_stats_data["avatar_url"] = remote_url  # Streams dynamic live URL directly to Flet
         
-        write_json(data = cached_dashboard, filename=f"precomputed_stats_{player_name}")
+        # Save into our in-memory tracking mapping dict instead of write_json()
+        all_players_precomputed_stats[player_name] = player_stats_data
 
-    write_json(data = players, filename="players")
-    print(f"Success! Generated master cache")
-
-if __name__ == "__main__":
-    build_static_dashboard_cache()
+    print(f"Success! Master stats matrix cache compiled entirely in memory.")
+    
+    # Return everything bundled cleanly to your data collector pipeline
+    return {
+        "players": players,
+        "precomputed_stats": all_players_precomputed_stats
+    }

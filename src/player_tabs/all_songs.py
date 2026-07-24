@@ -2,28 +2,50 @@ import flet as ft
 from data_processing.search_processor import find_song_by_id
 
 def generate_all_songs(player_stats_data):
-    all_songs_data = player_stats_data.get("all_songs") or {}
+    """
+    Renders an in-memory sub-tab ledger showcasing every single track
+    submitted by the selected user across all rounds of the music league.
+    """
+    all_songs_data = player_stats_data.get("all_songs") or []
 
-    all_songs_list =  ft.Container(
-                content = ft.Column(
-                    controls = [], 
-                    scroll= ft.ScrollMode.HIDDEN,
-                ),
-                border_radius=10,
-                height= 600,
-                alignment=ft.Alignment.CENTER_LEFT
-            )
+    all_songs_list = ft.Container(
+        content=ft.Column(
+            controls=[], 
+            scroll=ft.ScrollMode.AUTO,
+            spacing=15
+        ),
+        border_radius=10,
+        height=600,
+        alignment=ft.alignment.center_left,
+        expand=True
+    )
             
     for song_id in all_songs_data:
         song = find_song_by_id(song_id)
-        song_details = (f"{song.get('name')}\n"
-                        f"Artist: {song.get('artist')}\n"
-                        f"Album: {song.get('album')}\n"
-                        f"Votes: {song.get('votes')}")
-        all_songs_list.content.controls.append(ft.Text(song_details, size=20))
+        if not song:
+            continue
+            
+        song_card = ft.Card(
+            content=ft.Container(
+                padding=15,
+                content=ft.Column(
+                    controls=[
+                        ft.Row([
+                            ft.Icon(ft.Icons.MUSIC_NOTE, color="purple200", size=24),
+                            ft.Text(f"{song.get('name', 'Unknown Track')}", size=22, weight=ft.FontWeight.W_600, color="purple100")
+                        ], spacing=10),
+                        ft.Text(f"Artist: {song.get('artist', 'Unknown')}", size=16),
+                        ft.Text(f"Album: {song.get('album', 'Unknown')}", size=16),
+                        ft.Text(f"Total Votes Accumulated: {song.get('votes', 0)} pts", size=16, weight=ft.FontWeight.BOLD, color="greenAccent200")
+                    ],
+                    spacing=3
+                )
+            )
+        )
+        all_songs_list.content.controls.append(song_card)
     
     all_songs = ft.Container(
-        content= all_songs_list,
+        content=all_songs_list,
         expand=True,
         visible=False
     )
